@@ -51,7 +51,10 @@ JointTrajectoryController::JointTrajectoryController()
 }
 
 controller_interface::return_type JointTrajectoryController::init(
-  const std::string & controller_name)
+    const std::string & controller_name,
+    const std::string &,
+    const rclcpp::NodeOptions &
+    )
 {
   const auto ret = ControllerInterface::init(controller_name);
   if (ret != controller_interface::return_type::OK) {
@@ -117,7 +120,10 @@ JointTrajectoryController::state_interface_configuration() const
   return conf;
 }
 
-controller_interface::return_type JointTrajectoryController::update()
+controller_interface::return_type JointTrajectoryController::update(
+    const rclcpp::Time &,
+    const rclcpp::Duration &
+    )
 {
   if (get_current_state().id() == lifecycle_msgs::msg::State::PRIMARY_STATE_INACTIVE)
   {

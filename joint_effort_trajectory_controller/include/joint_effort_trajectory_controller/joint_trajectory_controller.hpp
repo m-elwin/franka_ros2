@@ -68,7 +68,10 @@ public:
   JointTrajectoryController();
 
   JOINT_TRAJECTORY_CONTROLLER_PUBLIC
-  controller_interface::return_type init(const std::string & controller_name) override;
+  controller_interface::return_type init(
+      const std::string & controller_name,
+      const std::string & namespace_ = "",
+      const rclcpp::NodeOptions & node_options = rclcpp::NodeOptions()) override;
 
   /**
    * @brief command_interface_configuration This controller requires the position command
@@ -85,7 +88,10 @@ public:
   controller_interface::InterfaceConfiguration state_interface_configuration() const override;
 
   JOINT_TRAJECTORY_CONTROLLER_PUBLIC
-  controller_interface::return_type update() override;
+  controller_interface::return_type update(
+      const rclcpp::Time & time,
+      const rclcpp::Duration & period
+      ) override;
 
   JOINT_TRAJECTORY_CONTROLLER_PUBLIC
   rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn on_configure(

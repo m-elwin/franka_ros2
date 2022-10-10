@@ -45,10 +45,10 @@ JointImpedanceExampleController::state_interface_configuration() const {
   return config;
 }
 
-controller_interface::return_type JointImpedanceExampleController::update() {
+controller_interface::return_type JointImpedanceExampleController::update(const rclcpp::Time &, const rclcpp::Duration & ) {
   updateJointStates();
   Vector7d q_goal = initial_q_;
-  auto time = this->node_->now() - start_time_;
+  auto time = get_node()->now() - start_time_;
   double delta_angle = M_PI / 8.0 * (1 - std::cos(M_PI / 2.5 * time.seconds()));
   q_goal(3) += delta_angle;
   q_goal(4) += delta_angle;
@@ -63,8 +63,10 @@ controller_interface::return_type JointImpedanceExampleController::update() {
   return controller_interface::return_type::OK;
 }
 
-controller_interface::return_type JointImpedanceExampleController::init(
-    const std::string& controller_name) {
+controller_interface::return_type JointImpedanceExampleController::init(const std::string & controller_name,
+                                       const std::string & ,
+                                       const rclcpp::NodeOptions & node_options)
+{
   auto ret = ControllerInterface::init(controller_name);
   if (ret != controller_interface::return_type::OK) {
     return ret;

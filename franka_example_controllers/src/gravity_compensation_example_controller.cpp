@@ -35,7 +35,7 @@ GravityCompensationExampleController::state_interface_configuration() const {
   return {};
 }
 
-controller_interface::return_type GravityCompensationExampleController::update() {
+    controller_interface::return_type GravityCompensationExampleController::update(const rclcpp::Time &, const rclcpp::Duration &) {
   for (auto& command_interface : command_interfaces_) {
     command_interface.set_value(0);
   }
@@ -45,12 +45,12 @@ controller_interface::return_type GravityCompensationExampleController::update()
 rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 GravityCompensationExampleController::on_configure(
     const rclcpp_lifecycle::State& /*previous_state*/) {
-  arm_id_ = node_->get_parameter("arm_id").as_string();
+    arm_id_ = get_node()->get_parameter("arm_id").as_string();
   return CallbackReturn::SUCCESS;
 }
 
 controller_interface::return_type GravityCompensationExampleController::init(
-    const std::string& controller_name) {
+    const std::string& controller_name, const std::string &, const rclcpp::NodeOptions &) {
   auto ret = ControllerInterface::init(controller_name);
   if (ret != controller_interface::return_type::OK) {
     return ret;

@@ -45,9 +45,9 @@ MoveToStartExampleController::state_interface_configuration() const {
   return config;
 }
 
-    controller_interface::return_type MoveToStartExampleController::update(const rclcpp::Time & time, const rclcpp::Duration & period) {
+controller_interface::return_type MoveToStartExampleController::update(const rclcpp::Time & , const rclcpp::Duration & ) {
   updateJointStates();
-  auto trajectory_time = this->node_->now() - start_time_;
+  auto trajectory_time = get_node()->now() - start_time_;
   auto motion_generator_output = motion_generator_->getDesiredJointPositions(trajectory_time);
   Vector7d q_desired = motion_generator_output.first;
   bool finished = motion_generator_output.second;
@@ -123,7 +123,7 @@ rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn
 MoveToStartExampleController::on_activate(const rclcpp_lifecycle::State& /*previous_state*/) {
   updateJointStates();
   motion_generator_ = std::make_unique<MotionGenerator>(0.2, q_, q_goal_);
-  start_time_ = this->node_->now();
+  start_time_ = get_node()->now();
   return CallbackReturn::SUCCESS;
 }
 

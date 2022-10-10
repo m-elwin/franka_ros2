@@ -31,8 +31,11 @@ class MoveToStartExampleController : public controller_interface::ControllerInte
   using Vector7d = Eigen::Matrix<double, 7, 1>;
   controller_interface::InterfaceConfiguration command_interface_configuration() const override;
   controller_interface::InterfaceConfiguration state_interface_configuration() const override;
-  controller_interface::return_type update() override;
-  controller_interface::return_type init(const std::string& controller_name) override;
+    controller_interface::return_type update(const rclcpp::Time & time, const rclcpp::Duration & period) override;
+    controller_interface::return_type init(const std::string& controller_name,
+                                           const std::string & namespace_ = "",
+                                           const rclcpp::NodeOptions & node_options = rclcpp::NodeOptions()
+        ) override;
   CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
   CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 

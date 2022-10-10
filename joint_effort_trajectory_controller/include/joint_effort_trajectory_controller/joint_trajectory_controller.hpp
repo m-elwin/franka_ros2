@@ -245,6 +245,8 @@ protected:
 
   bool read_state_from_command_interfaces(JointTrajectoryPoint & state);
 
+    /// here to make this compile
+    CallbackReturn on_init() override { return CallbackReturn::SUCCESS; }
 private:
   bool contains_interface_type(
     const std::vector<std::string> & interface_type_list, const std::string & interface_type);

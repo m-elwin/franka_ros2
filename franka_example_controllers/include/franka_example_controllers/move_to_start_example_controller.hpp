@@ -39,6 +39,8 @@ class MoveToStartExampleController : public controller_interface::ControllerInte
   CallbackReturn on_configure(const rclcpp_lifecycle::State& previous_state) override;
   CallbackReturn on_activate(const rclcpp_lifecycle::State& previous_state) override;
 
+    /// added to make this compile, don't know if it is correct
+   CallbackReturn on_init() override { return CallbackReturn::SUCCESS; };
  private:
   std::string arm_id_;
   const int num_joints = 7;

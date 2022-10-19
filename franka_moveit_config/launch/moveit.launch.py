@@ -21,7 +21,7 @@ from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription,
                             Shutdown)
-from launch.conditions import IfCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import Command, FindExecutable, LaunchConfiguration, PathJoinSubstitution
 from launch_ros.actions import Node
@@ -174,6 +174,25 @@ def generate_launch_description():
         executable='ros2_control_node',
         parameters=[robot_description, ros2_controllers_path],
         remappings=[('joint_states', 'franka/joint_states')],
+        condition=UnlessCondition(use_fake_hardware),
+        output={
+            'stdout': 'screen',
+            'stderr': 'screen',
+        },
+        on_exit=Shutdown(),
+    )
+
+    ros2_mock_path = os.path.join(
+        get_package_share_directory('franka_moveit_config'),
+        'config',
+        'panda_mock_controllers.yaml',
+    )
+    ros2_control_mock_node = Node(
+        package='controller_manager',
+        executable='ros2_control_node',
+        parameters=[robot_description, ros2_mock_path],
+        remappings=[('joint_states', 'franka/joint_states')],
+        condition=IfCondition(use_fake_hardware),
         output={
             'stdout': 'screen',
             'stderr': 'screen',
@@ -241,6 +260,7 @@ def generate_launch_description():
          robot_state_publisher,
          run_move_group_node,
          ros2_control_node,
+         ros2_control_mock_node,
          mongodb_server_node,
          joint_state_publisher,
          gripper_launch_file

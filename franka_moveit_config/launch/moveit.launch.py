@@ -134,6 +134,7 @@ def generate_launch_description():
             trajectory_execution,
             moveit_controllers,
             planning_scene_monitor_parameters,
+            {"publish_robot_description_semantic": True}
         ],
     )
 

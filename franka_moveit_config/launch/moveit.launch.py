@@ -153,6 +153,7 @@ def generate_launch_description():
             ompl_planning_pipeline_config,
             kinematics_yaml,
         ],
+        condition = IfCondition(LaunchConfiguration("use_rviz"))
     )
 
     # Publish TF
@@ -256,6 +257,7 @@ def generate_launch_description():
          use_fake_hardware_arg,
          fake_sensor_commands_arg,
          db_arg,
+         DeclareLaunchArgument("use_rviz", default_value='True', description='Use Rviz'),
          rviz_node,
          robot_state_publisher,
          run_move_group_node,

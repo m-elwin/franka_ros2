@@ -16,7 +16,6 @@
 # https://github.com/ros-planning/moveit_resources/blob/ca3f7930c630581b5504f3b22c40b4f82ee6369d/panda_moveit_config/launch/demo.launch.py
 
 # Adapted to launch rviz with the right moveit parameters and nothing else.
-# This allows running moveit (with use_rviz:=false) on the franka robot and running this to run rviz on the host computer
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -100,19 +99,21 @@ def generate_launch_description():
     rviz_base = os.path.join(get_package_share_directory('franka_moveit_config'), 'rviz')
     rviz_full_config = os.path.join(rviz_base, 'moveit.rviz')
 
+    rviz_arg = DeclareLaunchArgument("rviz_config",
+                                     default_value=rviz_full_config,
+                                     description="Path to an rviz configuration file to use")
     rviz_node = Node(
         package='rviz2',
         executable='rviz2',
         name='rviz2',
         output='log',
-        arguments=['-d', rviz_full_config],
+        arguments=['-d', LaunchConfiguration("rviz_config")],
         parameters=[
             robot_description,
             robot_description_semantic,
             ompl_planning_pipeline_config,
             kinematics_yaml,
         ],
-        condition = IfCondition(LaunchConfiguration("use_rviz"))
     )
 
     robot_arg = DeclareLaunchArgument(
@@ -135,7 +136,8 @@ def generate_launch_description():
                           use_fake_hardware_parameter_name: use_fake_hardware}.items(),
     )
     return LaunchDescription(
-        [robot_arg,
+        [rviz_arg,
+         robot_arg,
          use_fake_hardware_arg,
          fake_sensor_commands_arg,
          rviz_node,

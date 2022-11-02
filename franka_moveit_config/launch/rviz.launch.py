@@ -15,6 +15,8 @@
 # This file is an adapted version of
 # https://github.com/ros-planning/moveit_resources/blob/ca3f7930c630581b5504f3b22c40b4f82ee6369d/panda_moveit_config/launch/demo.launch.py
 
+# Adapted to launch rviz with the right moveit parameters and nothing else.
+# This allows running moveit (with use_rviz:=false) on the franka robot and running this to run rviz on the host computer
 import os
 
 from ament_index_python.packages import get_package_share_directory
@@ -50,10 +52,6 @@ def generate_launch_description():
     fake_sensor_commands = LaunchConfiguration(fake_sensor_commands_parameter_name)
 
     # Command-line arguments
-
-    db_arg = DeclareLaunchArgument(
-        'db', default_value='False', description='Database flag'
-    )
 
     # planning_context
     franka_xacro_file = os.path.join(get_package_share_directory('franka_description'), 'robots',
@@ -97,46 +95,6 @@ def generate_launch_description():
     )
     ompl_planning_pipeline_config['move_group'].update(ompl_planning_yaml)
 
-    # Trajectory Execution Functionality
-    moveit_simple_controllers_yaml = load_yaml(
-        'franka_moveit_config', 'config/panda_controllers.yaml'
-    )
-    moveit_controllers = {
-        'moveit_simple_controller_manager': moveit_simple_controllers_yaml,
-        'moveit_controller_manager': 'moveit_simple_controller_manager'
-                                     '/MoveItSimpleControllerManager',
-    }
-
-    trajectory_execution = {
-        'moveit_manage_controllers': True,
-        'trajectory_execution.allowed_execution_duration_scaling': 1.2,
-        'trajectory_execution.allowed_goal_duration_margin': 0.5,
-        'trajectory_execution.allowed_start_tolerance': 0.01,
-    }
-
-    planning_scene_monitor_parameters = {
-        'publish_planning_scene': True,
-        'publish_geometry_updates': True,
-        'publish_state_updates': True,
-        'publish_transforms_updates': True,
-    }
-
-    # Start the actual move_group node/action server
-    run_move_group_node = Node(
-        package='moveit_ros_move_group',
-        executable='move_group',
-        output='screen',
-        parameters=[
-            robot_description,
-            robot_description_semantic,
-            kinematics_yaml,
-            ompl_planning_pipeline_config,
-            trajectory_execution,
-            moveit_controllers,
-            planning_scene_monitor_parameters,
-            {"publish_robot_description_semantic": True}
-        ],
-    )
 
     # RViz
     rviz_base = os.path.join(get_package_share_directory('franka_moveit_config'), 'rviz')
@@ -157,83 +115,6 @@ def generate_launch_description():
         condition = IfCondition(LaunchConfiguration("use_rviz"))
     )
 
-    # Publish TF
-    robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
-        name='robot_state_publisher',
-        output='both',
-        parameters=[robot_description],
-    )
-
-    ros2_controllers_path = os.path.join(
-        get_package_share_directory('franka_moveit_config'),
-        'config',
-        'panda_ros_controllers.yaml',
-    )
-    ros2_control_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
-        parameters=[robot_description, ros2_controllers_path],
-        remappings=[('joint_states', 'franka/joint_states')],
-        condition=UnlessCondition(use_fake_hardware),
-        output={
-            'stdout': 'screen',
-            'stderr': 'screen',
-        },
-        on_exit=Shutdown(),
-    )
-
-    ros2_mock_path = os.path.join(
-        get_package_share_directory('franka_moveit_config'),
-        'config',
-        'panda_mock_controllers.yaml',
-    )
-    ros2_control_mock_node = Node(
-        package='controller_manager',
-        executable='ros2_control_node',
-        parameters=[robot_description, ros2_mock_path],
-        remappings=[('joint_states', 'franka/joint_states')],
-        condition=IfCondition(use_fake_hardware),
-        output={
-            'stdout': 'screen',
-            'stderr': 'screen',
-        },
-        on_exit=Shutdown(),
-    )
-
-    # Load controllers
-    load_controllers = []
-    for controller in ['panda_arm_controller', 'joint_state_broadcaster']:
-        load_controllers += [
-            ExecuteProcess(
-                cmd=['ros2 run controller_manager spawner {}'.format(controller)],
-                shell=True,
-                output='screen',
-            )
-        ]
-
-    # Warehouse mongodb server
-    db_config = LaunchConfiguration('db')
-    mongodb_server_node = Node(
-        package='warehouse_ros_mongo',
-        executable='mongo_wrapper_ros.py',
-        parameters=[
-            {'warehouse_port': 33829},
-            {'warehouse_host': 'localhost'},
-            {'warehouse_plugin': 'warehouse_ros_mongo::MongoDatabaseConnection'},
-        ],
-        output='screen',
-        condition=IfCondition(db_config)
-    )
-
-    joint_state_publisher = Node(
-        package='joint_state_publisher',
-        executable='joint_state_publisher',
-        name='joint_state_publisher',
-        parameters=[
-            {'source_list': ['franka/joint_states', 'panda_gripper/joint_states'], 'rate': 30}],
-    )
     robot_arg = DeclareLaunchArgument(
         robot_ip_parameter_name,
         description='Hostname or IP address of the robot.')

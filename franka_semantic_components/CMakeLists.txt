@@ -21,12 +21,13 @@ foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
 endforeach()
 
 find_package(Franka REQUIRED)
-
+find_package(controller_interface REQUIRED)
 add_library(franka_semantic_components SHARED src/franka_robot_state.cpp src/franka_robot_model.cpp)
 target_include_directories(franka_semantic_components PRIVATE include)
 target_link_libraries(franka_semantic_components Franka::Franka)
 ament_target_dependencies(franka_semantic_components
-                          Franka
+  Franka
+  controller_interface
                           ${THIS_PACKAGE_INCLUDE_DEPENDS})
 
 install(TARGETS franka_semantic_components DESTINATION lib)

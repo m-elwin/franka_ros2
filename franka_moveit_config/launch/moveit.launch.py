@@ -51,6 +51,14 @@ def generate_launch_description():
 
     # Command-line arguments
 
+    config_joint_limits = load_yaml(
+        'franka_moveit_config',
+        f'config/joint_limits.yaml'
+    )
+
+    joint_limits = {
+        'robot_description_planning': config_joint_limits,
+    }
     db_arg = DeclareLaunchArgument(
         'db', default_value='False', description='Database flag'
     )
@@ -134,7 +142,8 @@ def generate_launch_description():
             trajectory_execution,
             moveit_controllers,
             planning_scene_monitor_parameters,
-            {"publish_robot_description_semantic": True}
+            {"publish_robot_description_semantic": True},
+            joint_limits
         ],
     )
 

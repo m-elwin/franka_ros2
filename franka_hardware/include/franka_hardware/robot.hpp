@@ -25,6 +25,7 @@
 #include <franka/robot.h>
 #include <rclcpp/logger.hpp>
 
+#include <franka_msgs/srv/set_load.hpp>
 namespace franka_hardware {
 
 class Robot {
@@ -76,6 +77,7 @@ class Robot {
   /// @return true if there is no control or reading loop running.
   bool isStopped() const;
 
+    void setLoad(const franka_msgs::srv::SetLoad::Request::SharedPtr& req);
  private:
   std::unique_ptr<std::thread> control_thread_;
   std::unique_ptr<franka::Robot> robot_;

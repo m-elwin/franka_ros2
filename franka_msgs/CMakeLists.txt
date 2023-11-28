@@ -10,6 +10,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/Homing.action"
   "action/Move.action"
   "msg/GraspEpsilon.msg"
+  "srv/SetLoad.srv"
   DEPENDENCIES std_msgs builtin_interfaces
 )
 

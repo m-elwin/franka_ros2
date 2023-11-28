@@ -95,4 +95,16 @@ Robot::~Robot() {
 bool Robot::isStopped() const {
   return stopped_;
 }
+
+void Robot::setLoad(const franka_msgs::srv::SetLoad::Request::SharedPtr& req) {
+  std::lock_guard<std::mutex> lock(write_mutex_);
+  double mass(req->mass);
+  std::array<double, 3> center_of_mass{};  // NOLINT [readability-identifier-naming]
+  std::copy(req->center_of_mass.cbegin(), req->center_of_mass.cend(), center_of_mass.begin());
+  std::array<double, 9> load_inertia{};
+  std::copy(req->load_inertia.cbegin(), req->load_inertia.cend(), load_inertia.begin());
+
+  robot_->setLoad(mass, center_of_mass, load_inertia);
+}
+
 }  // namespace franka_hardware

@@ -27,6 +27,8 @@
 #include <rclcpp/macros.hpp>
 #include <rclcpp/rclcpp.hpp>
 
+#include "franka_hardware/franka_param_service_server.hpp"
+#include "franka_hardware/franka_executor.hpp"
 namespace franka_hardware {
 
 class FrankaHardwareInterface
@@ -49,13 +51,15 @@ class FrankaHardwareInterface
   static const size_t kNumberOfJoints = 7;
 
  private:
-  std::unique_ptr<Robot> robot_;
+  std::shared_ptr<Robot> robot_;
   std::array<double, kNumberOfJoints> hw_commands_{0, 0, 0, 0, 0, 0, 0};
   std::array<double, kNumberOfJoints> hw_positions_{0, 0, 0, 0, 0, 0, 0};
   std::array<double, kNumberOfJoints> hw_velocities_{0, 0, 0, 0, 0, 0, 0};
   std::array<double, kNumberOfJoints> hw_efforts_{0, 0, 0, 0, 0, 0, 0};
   bool effort_interface_claimed_ = false;
   bool effort_interface_running_ = false;
+  std::shared_ptr<FrankaParamServiceServer> node_;
+  std::shared_ptr<FrankaExecutor> executor_;
   static rclcpp::Logger getLogger();
 };
 }  // namespace franka_hardware

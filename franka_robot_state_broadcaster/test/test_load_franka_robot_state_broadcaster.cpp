@@ -24,12 +24,14 @@
 
 TEST(TestLoadFrankaRobotStateBroadcaster, load_controller) {
   rclcpp::init(0, nullptr);
-
-  std::shared_ptr<rclcpp::Executor> executor =
-      std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
-
+  auto rm_node = std::make_shared<rclcpp::Node>("ResourceManager");
+  auto executor = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
   controller_manager::ControllerManager cm(std::make_unique<hardware_interface::ResourceManager>(
-                                               ros2_control_test_assets::minimal_robot_urdf),
+                                               ros2_control_test_assets::minimal_robot_urdf,
+                                               rm_node->get_node_clock_interface(),
+                                               rm_node->get_node_logging_interface(),
+                                               true
+                                               ),
                                            executor, "test_controller_manager");
 
   auto controller =

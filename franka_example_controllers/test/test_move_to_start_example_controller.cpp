@@ -42,7 +42,8 @@ void MoveToStartExampleControllerTest::TearDown() {
 }
 
 void MoveToStartExampleControllerTest::SetUpController() {
-  const auto result = controller_->init("test_move_to_start_example");
+    const auto result = controller_->init("test_move_to_start_example", "", 0, "", controller_->define_custom_node_options());
+
   ASSERT_EQ(result, controller_interface::return_type::OK);
   std::vector<LoanedCommandInterface> command_ifs;
   std::vector<LoanedStateInterface> state_ifs;

@@ -31,6 +31,7 @@ endforeach()
 
 find_package(Franka 0.13.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(controller_interface)
 
 add_library(
   franka_semantic_components SHARED
@@ -47,7 +48,7 @@ target_include_directories(
 target_link_libraries(franka_semantic_components Franka::Franka Eigen3::Eigen)
 
 ament_target_dependencies(franka_semantic_components Franka sensor_msgs
-                          geometry_msgs ${THIS_PACKAGE_INCLUDE_DEPENDS})
+                          geometry_msgs ${THIS_PACKAGE_INCLUDE_DEPENDS} controller_interface)
 
 install(TARGETS franka_semantic_components DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)

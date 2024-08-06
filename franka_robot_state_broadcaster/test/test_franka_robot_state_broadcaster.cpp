@@ -37,7 +37,7 @@ class TestFrankaRobotStateBroadcaster : public ::testing::Test {
     franka_robot_state_ = std::make_unique<MockFrankaRobotState>(
         "mock_franka_robot_state", ros2_control_test_assets::minimal_robot_urdf);
     broadcaster_ = std::make_unique<FrankaRobotStateBroadcaster>(std::move(franka_robot_state_));
-    broadcaster_->init("test_broadcaster");
+    broadcaster_->init("test_broadcaster", ros2_control_test_assets::minimal_robot_urdf, 0, "", rclcpp::NodeOptions());
     broadcaster_->get_node()->set_parameter(
         {"robot_description", ros2_control_test_assets::minimal_robot_urdf});
   }

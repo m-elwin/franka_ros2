@@ -73,7 +73,7 @@ void TestGravityCompensationExample::TearDown() {
 }
 
 void TestGravityCompensationExample::SetUpController() {
-  const auto result = controller_->init("test_gravitiy_compensation_example");
+    const auto result = controller_->init("test_gravitiy_compensation_example", "", 0, "", controller_->define_custom_node_options());
   ASSERT_EQ(result, controller_interface::return_type::OK);
   std::vector<LoanedCommandInterface> command_ifs;
   command_ifs.emplace_back(joint_1_pos_cmd_);

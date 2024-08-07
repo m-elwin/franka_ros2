@@ -3,7 +3,3 @@ franka_robot_state_broadcaster:
     type: string,
     default_value: "fr3",
   }
-
-  robot_description: {
-    type: string,
-  }

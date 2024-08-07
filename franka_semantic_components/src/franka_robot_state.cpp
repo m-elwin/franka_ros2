@@ -170,6 +170,7 @@ auto FrankaRobotState::initialize_robot_state_msg(franka_msgs::msg::FrankaRobotS
 }
 
 auto FrankaRobotState::get_values_as_message(franka_msgs::msg::FrankaRobotState& message) -> bool {
+auto time1 = std::chrono::high_resolution_clock::now();
   const std::string full_interface_name = robot_name_ + "/" + state_interface_name_;
 
   auto franka_state_interface =
@@ -186,6 +187,9 @@ auto FrankaRobotState::get_values_as_message(franka_msgs::msg::FrankaRobotState&
                  "controller?");
     return false;
   }
+auto time2 = std::chrono::high_resolution_clock::now()
+auto dur = std::chrono::duration_cast<std::chrono::microseconds>(time2 - time1);
+RCLCPP_ERROR_STREAM(rclcpp::get_logger("franka_state_semantic_component"), "Time to get values: " << dur);
 
   // Update the time stamps of the data
   translation::updateTimeStamps(message.header.stamp, message);

@@ -75,6 +75,7 @@ def robot_description_dependent_nodes_spawner(
             executable='ros2_control_node',
             parameters=[franka_controllers,
                         {'arm_id': arm_id},
+                        {'robot_description': robot_description}
                         ],
             remappings=[('joint_states', 'franka/joint_states')],
             output={
@@ -157,7 +158,6 @@ def generate_launch_description():
             package='controller_manager',
             executable='spawner',
             arguments=['franka_robot_state_broadcaster'],
-            parameters=[{'arm_id': arm_id}],
             output='screen',
             condition=UnlessCondition(use_fake_hardware),
         ),

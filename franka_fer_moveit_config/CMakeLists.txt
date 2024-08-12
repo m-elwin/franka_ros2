@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(franka_fr3_moveit_config)
+project(franka_fer_moveit_config)
 
 find_package(ament_cmake REQUIRED)
 

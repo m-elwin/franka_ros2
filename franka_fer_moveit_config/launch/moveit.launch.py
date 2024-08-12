@@ -70,7 +70,7 @@ def generate_launch_description():
     # planning_context
     franka_xacro_file = os.path.join(
         get_package_share_directory('franka_description'),
-        'robots', 'fr3', 'fr3.urdf.xacro'
+        'robots', 'fer', 'fer.urdf.xacro'
     )
 
     robot_description_config = Command(
@@ -82,9 +82,9 @@ def generate_launch_description():
         robot_description_config, value_type=str)}
 
     franka_semantic_xacro_file = os.path.join(
-        get_package_share_directory('franka_fr3_moveit_config'),
+        get_package_share_directory('franka_fer_moveit_config'),
         'srdf',
-        'fr3_arm.srdf.xacro'
+        'fer_arm.srdf.xacro'
     )
 
     robot_description_semantic_config = Command(
@@ -96,7 +96,7 @@ def generate_launch_description():
         robot_description_semantic_config, value_type=str)}
 
     kinematics_yaml = load_yaml(
-        'franka_fr3_moveit_config', 'config/kinematics.yaml'
+        'franka_fer_moveit_config', 'config/kinematics.yaml'
     )
 
     # Planning Functionality
@@ -113,13 +113,13 @@ def generate_launch_description():
         }
     }
     ompl_planning_yaml = load_yaml(
-        'franka_fr3_moveit_config', 'config/ompl_planning.yaml'
+        'franka_fer_moveit_config', 'config/ompl_planning.yaml'
     )
     ompl_planning_pipeline_config['move_group'].update(ompl_planning_yaml)
 
     # Trajectory Execution Functionality
     moveit_simple_controllers_yaml = load_yaml(
-        'franka_fr3_moveit_config', 'config/fr3_controllers.yaml'
+        'franka_fer_moveit_config', 'config/fer_controllers.yaml'
     )
     moveit_controllers = {
         'moveit_simple_controller_manager': moveit_simple_controllers_yaml,
@@ -159,7 +159,7 @@ def generate_launch_description():
 
     # RViz
     rviz_base = os.path.join(get_package_share_directory(
-        'franka_fr3_moveit_config'), 'rviz')
+        'franka_fer_moveit_config'), 'rviz')
     rviz_full_config = os.path.join(rviz_base, 'moveit.rviz')
 
     rviz_node = Node(
@@ -186,9 +186,9 @@ def generate_launch_description():
     )
 
     ros2_controllers_path = os.path.join(
-        get_package_share_directory('franka_fr3_moveit_config'),
+        get_package_share_directory('franka_fer_moveit_config'),
         'config',
-        'fr3_ros_controllers.yaml',
+        'fer_ros_controllers.yaml',
     )
     ros2_control_node = Node(
         package='controller_manager',
@@ -204,7 +204,7 @@ def generate_launch_description():
 
     # Load controllers
     load_controllers = []
-    for controller in ['fr3_arm_controller', 'joint_state_broadcaster']:
+    for controller in ['fer_arm_controller', 'joint_state_broadcaster']:
         load_controllers += [
             ExecuteProcess(
                 cmd=['ros2 run controller_manager spawner {}'.format(
@@ -219,7 +219,7 @@ def generate_launch_description():
         executable='joint_state_publisher',
         name='joint_state_publisher',
         parameters=[
-            {'source_list': ['franka/joint_states', 'fr3_gripper/joint_states'], 'rate': 30}],
+            {'source_list': ['franka/joint_states', 'fer_gripper/joint_states'], 'rate': 30}],
     )
 
     franka_robot_state_broadcaster = Node(

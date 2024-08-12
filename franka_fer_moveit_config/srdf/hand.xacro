@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="fr3">
-  <xacro:macro name="hand" params="arm_id:='fr3' ">
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="fer">
+  <xacro:macro name="hand" params="arm_id:='fer' ">
 
     <group name="hand">
       <link name="${arm_id}_hand"/>

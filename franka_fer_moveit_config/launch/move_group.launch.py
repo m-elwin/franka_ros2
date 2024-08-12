@@ -53,7 +53,7 @@ def generate_launch_description():
 
     franka_xacro_file = os.path.join(
         get_package_share_directory('franka_description'),
-        'robots', 'fr3', 'fr3.urdf.xacro'
+        'robots', 'fer', 'fer.urdf.xacro'
     )
 
     robot_description_command = Command(
@@ -63,7 +63,7 @@ def generate_launch_description():
             franka_xacro_file,
             ' ros2_control:=false',
             ' hand:=true',
-            ' arm_id:=fr3',
+            ' arm_id:=fer',
             ' robot_ip:=',
             robot_ip,
             ' use_fake_hardware:=',
@@ -77,8 +77,8 @@ def generate_launch_description():
         robot_description_command, value_type=str)}
 
     franka_semantic_xacro_file = os.path.join(
-        get_package_share_directory('franka_fr3_moveit_config'),
-        'srdf', 'fr3_arm.srdf.xacro'
+        get_package_share_directory('franka_fer_moveit_config'),
+        'srdf', 'fer_arm.srdf.xacro'
     )
 
     robot_description_semantic_command = Command(
@@ -91,7 +91,7 @@ def generate_launch_description():
         robot_description_semantic_command, value_type=str)}
 
     kinematics_yaml = load_yaml(
-        'franka_fr3_moveit_config', 'config/kinematics.yaml')
+        'franka_fer_moveit_config', 'config/kinematics.yaml')
 
     run_move_group_node = Node(
         package='moveit_ros_move_group',

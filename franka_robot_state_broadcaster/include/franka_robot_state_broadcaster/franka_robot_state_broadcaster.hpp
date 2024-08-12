@@ -25,7 +25,13 @@
 #include "franka_semantic_components/franka_robot_state.hpp"
 #include "rclcpp_lifecycle/lifecycle_publisher.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
+
+// define NON_POLLING to disable polling mode in the realtime publisher.
+// Without NON_POLLING mode there is a race condition where this controller
+// attempts to aquire the lock, fails, and then terminates
+#define NON_POLLING
 #include "realtime_tools/realtime_publisher.h"
+#undef NON_POLLING
 
 namespace franka_robot_state_broadcaster {
 class FrankaRobotStateBroadcaster : public controller_interface::ControllerInterface {

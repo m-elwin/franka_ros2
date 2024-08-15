@@ -67,26 +67,6 @@ def generate_launch_description():
     ompl_planning_pipeline_config['ompl'].update(load_yaml(
         'franka_fer_moveit_config', 'config/ompl_planning.yaml'))
 
-
-
-
-
-
-    # Load controllers
-#    load_controllers = []
-#    for controller in ['fer_arm_controller', 'joint_state_broadcaster']:
-#        load_controllers += [
-#            ExecuteProcess(
-#                cmd=['ros2 run controller_manager spawner {}'.format(
-#                    controller)],
-#                shell=True,
-#                output='screen',
-#            )
-#        ]
-
-
-
-
     robot_description = ParameterValue(Command([ExecutableInPackage("xacro", "xacro"), " ",
                                                 PathJoinSubstitution([FindPackageShare("franka_description"), "robots", "fer", "fer.urdf.xacro"]),
                                                 ' hand:=true',
@@ -94,9 +74,11 @@ def generate_launch_description():
                                                 ' use_fake_hardware:=',LaunchConfiguration('use_fake_hardware'),
                                                 ' fake_sensor_commands:=',LaunchConfiguration('fake_sensor_commands'),
                                                 ' ros2_control:=true']),value_type=str)
+
     robot_description_semantic = ParameterValue(Command([ExecutableInPackage("xacro", "xacro"), ' ',
                                                         PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'),'srdf','fer_arm.srdf.xacro'])])
                                                , value_type=str)
+
     return LaunchDescription(
         [ DeclareLaunchArgument('robot_ip', description='Hostname or IP address of the robot.')
          ,DeclareLaunchArgument('use_fake_hardware', default_value='false',description='Use fake hardware')
@@ -162,6 +144,9 @@ def generate_launch_description():
           ,IncludeLaunchDescription(PathJoinSubstitution([FindPackageShare('franka_gripper'), 'launch', 'gripper.launch.py']),
                                     launch_arguments={'robot_ip': LaunchConfiguration('robot_ip'),
                                                       'use_fake_hardware' : LaunchConfiguration('use_fake_hardware')}.items())
+          ,ExecuteProcess(cmd=[ExecutableInPackage('spawner', 'controller_manager'),' fer_arm_controller'],
+                          shell=True, output='screen')
+          ,ExecuteProcess(cmd=[ExecutableInPackage('spawner', 'controller_manager'),' joint_state_broadcaster'],
+                          shell=True, output='screen')
          ]
-#        + load_controllers
     )

@@ -50,9 +50,7 @@ def load_yaml(package_name, file_path):
         return None
 
 def generate_launch_description():
-
-
-    # Planning Functionality
+    # Load the plannning pipeline
     ompl_planning_pipeline_config = {
         'ompl': {
             'planning_plugins': ['ompl_interface/OMPLPlanner'],
@@ -66,10 +64,8 @@ def generate_launch_description():
             'start_state_max_bounds_error': 0.1,
         }
     }
-    ompl_planning_yaml = load_yaml(
-        'franka_fer_moveit_config', 'config/ompl_planning.yaml'
-    )
-    ompl_planning_pipeline_config['ompl'].update(ompl_planning_yaml)
+    ompl_planning_pipeline_config['ompl'].update(load_yaml(
+        'franka_fer_moveit_config', 'config/ompl_planning.yaml'))
 
 
 
@@ -107,21 +103,8 @@ def generate_launch_description():
 #        ]
 
 
-#    franka_robot_state_broadcaster = Node(
-#        package='controller_manager',
-#        executable='spawner',
-#        arguments=['franka_robot_state_broadcaster'],
-#        output='screen',
-#        condition=UnlessCondition(use_fake_hardware),
-#    )
 
 
-#    gripper_launch_file = IncludeLaunchDescription(
-#        PythonLaunchDescriptionSource([PathJoinSubstitution(
-#            [FindPackageShare('franka_gripper'), 'launch', 'gripper.launch.py'])]),
-#        launch_arguments={'robot_ip': robot_ip,
-#                          use_fake_hardware_parameter_name: use_fake_hardware}.items(),
-#    )
     robot_description = ParameterValue(Command([ExecutableInPackage("xacro", "xacro"), " ",
                                                 PathJoinSubstitution([FindPackageShare("franka_description"), "robots", "fer", "fer.urdf.xacro"]),
                                                 ' hand:=true',
@@ -184,8 +167,14 @@ def generate_launch_description():
                      }
                 ]
           )
-#         franka_robot_state_broadcaster,
-#         gripper_launch_file
+          ,Node(package='controller_manager',
+               executable='spawner',
+               arguments=['franka_robot_state_broadcaster'],
+               output='screen',
+               condition=UnlessCondition(LaunchConfiguration('use_fake_hardware')))
+          ,IncludeLaunchDescription(PathJoinSubstitution([FindPackageShare('franka_gripper'), 'launch', 'gripper.launch.py']),
+                                    launch_arguments={'robot_ip': LaunchConfiguration('robot_ip'),
+                                                      'use_fake_hardware' : LaunchConfiguration('use_fake_hardware')}.items())
          ]
 #        + load_controllers
     )

@@ -71,39 +71,7 @@ def generate_launch_description():
     )
     ompl_planning_pipeline_config['ompl'].update(ompl_planning_yaml)
 
-#    # Trajectory Execution Functionality
-#    moveit_simple_controllers_yaml = load_yaml(
-#        'franka_fer_moveit_config', 'config/fer_controllers.yaml'
-#    )
-#    moveit_controllers = {
-#        'moveit_simple_controller_manager': moveit_simple_controllers_yaml,
-#        'moveit_controller_manager': 'moveit_simple_controller_manager'
-#                                     '/MoveItSimpleControllerManager',
-#    }
-#
-#    trajectory_execution = {
-#        'moveit_manage_controllers': True,
-#        'trajectory_execution.allowed_execution_duration_scaling': 1.2,
-#        'trajectory_execution.allowed_goal_duration_margin': 0.5,
-#        'trajectory_execution.allowed_start_tolerance': 0.01,
-#    }
 
-#
-#    # Start the actual move_group node/action server
-#    run_move_group_node = Node(
-#        package='moveit_ros_move_group',
-#        executable='move_group',
-#        output='screen',
-#        parameters=[
-#            robot_description,
-#            robot_description_semantic,
-#            kinematics_yaml,
-#            ompl_planning_pipeline_config,
-#            trajectory_execution,
-#            moveit_controllers,
-#            planning_scene_monitor_parameters,
-#        ],
-#    )
 
     # RViz
 #    rviz_base = os.path.join(get_package_share_directory(
@@ -199,11 +167,21 @@ def generate_launch_description():
                      'monitor_dynamics': False,
                      'robot_description': robot_description,
                      'robot_description_semantic': robot_description_semantic,
+                     'robot_description_kinematics': load_yaml('franka_fer_moveit_config', 'config/kinematics.yaml')
                      },
-                    {'robot_description_kinematics': load_yaml('franka_fer_moveit_config', 'config/kinematics.yaml')},
+                    # Setup the planning pipeline
                     ompl_planning_pipeline_config,
-                    {'default_planning_pipeline': 'ompl'},
-                    {'planning_pipelines': ['ompl']}
+                    {'default_planning_pipeline': 'ompl',
+                     'planning_pipelines': ['ompl']
+                    },
+                    # Allow moveit to manage trajectory execution
+                    {'moveit_simple_controller_manager': load_yaml('franka_fer_moveit_config', 'config/fer_controllers.yaml'),
+                     'moveit_controller_manager': 'moveit_simple_controller_manager/MoveItSimpleControllerManager',
+                     'moveit_manage_controllers': True,
+                     'trajectory_execution.allowed_execution_duration_scaling': 1.2,
+                     'trajectory_execution.allowed_goal_duration_margin': 0.5,
+                     'trajectory_execution.allowed_start_tolerance': 0.01,
+                     }
                 ]
           )
 #         franka_robot_state_broadcaster,

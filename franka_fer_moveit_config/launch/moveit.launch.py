@@ -119,7 +119,8 @@ def generate_launch_description():
                      'monitor_dynamics': False,
                      'robot_description': robot_description,
                      'robot_description_semantic': robot_description_semantic,
-                     'robot_description_kinematics': load_yaml('franka_fer_moveit_config', 'config/kinematics.yaml')
+                     'robot_description_kinematics': load_yaml('franka_fer_moveit_config', 'config/kinematics.yaml'),
+                     'robot_description_planning': load_yaml('franka_fer_moveit_config', 'config/joint_limits.yaml')
                      },
                     # Setup the planning pipeline
                     ompl_planning_pipeline_config,

@@ -200,7 +200,7 @@ def generate_launch_description():
                      'robot_description': robot_description,
                      'robot_description_semantic': robot_description_semantic,
                      },
-                    load_yaml('franka_fer_moveit_config', 'config/kinematics.yaml'),
+                    {'robot_description_kinematics': load_yaml('franka_fer_moveit_config', 'config/kinematics.yaml')},
                     ompl_planning_pipeline_config,
                     {'default_planning_pipeline': 'ompl'},
                     {'planning_pipelines': ['ompl']}

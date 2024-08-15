@@ -69,24 +69,6 @@ def generate_launch_description():
 
 
 
-    # RViz
-#    rviz_base = os.path.join(get_package_share_directory(
-#        'franka_fer_moveit_config'), 'rviz')
-#    rviz_full_config = os.path.join(rviz_base, 'moveit.rviz')
-
-#    rviz_node = Node(
-#        package='rviz2',
-#        executable='rviz2',
-#        name='rviz2',
-#        output='log',
-#        arguments=['-d', rviz_full_config],
-#        parameters=[
-#            robot_description,
-#            robot_description_semantic,
-#            ompl_planning_pipeline_config,
-#            kinematics_yaml,
-#        ],
-#    )
 
 
 
@@ -120,7 +102,12 @@ def generate_launch_description():
          ,DeclareLaunchArgument('use_fake_hardware', default_value='false',description='Use fake hardware')
          ,DeclareLaunchArgument('fake_sensor_commands', default_value='false', description='Fake sensor commands. Only valid when "use_fake_hardware" == true')
          ,DeclareLaunchArgument('db', default_value='False', description='Database flag')
-#        rviz_node,
+
+          ,Node(package='rviz2',
+                executable='rviz2',
+                output='log',
+                arguments=['-d', PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'),'rviz','moveit.rviz'])],
+              )
          ,Node(package='robot_state_publisher',
               executable='robot_state_publisher',
               name='robot_state_publisher',

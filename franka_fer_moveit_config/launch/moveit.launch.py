@@ -79,7 +79,7 @@ def generate_launch_description():
     robot_description_semantic = ParameterValue(Command([ExecutableInPackage("xacro", "xacro"), ' ',
                                                         PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'),'srdf','fer_arm.srdf.xacro'])])
                                                , value_type=str)
-    kinematics_yaml = load_yaml('franka_fer_moveit_config', 'config/kinematics.yaml')
+    kinematics_yaml = {"robot_description_kinematics" : load_yaml('franka_fer_moveit_config', 'config/kinematics.yaml')}
 
     return LaunchDescription(
         [ DeclareLaunchArgument('robot_ip', description='Hostname or IP address of the robot.')

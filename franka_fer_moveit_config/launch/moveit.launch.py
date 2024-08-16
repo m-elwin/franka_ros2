@@ -143,8 +143,10 @@ def generate_launch_description():
                output='screen',
                condition=UnlessCondition(LaunchConfiguration('use_fake_hardware')))
           ,IncludeLaunchDescription(PathJoinSubstitution([FindPackageShare('franka_gripper'), 'launch', 'gripper.launch.py']),
-                                    launch_arguments={'robot_ip': LaunchConfiguration('robot_ip'),
-                                                      'use_fake_hardware' : LaunchConfiguration('use_fake_hardware')}.items())
+                                    launch_arguments={
+                                        'arm_id' : 'fer',
+                                        'robot_ip': LaunchConfiguration('robot_ip'),
+                                        'use_fake_hardware' : LaunchConfiguration('use_fake_hardware')}.items())
           ,ExecuteProcess(cmd=[ExecutableInPackage('spawner', 'controller_manager'),' fer_arm_controller'],
                           shell=True, output='screen')
           ,ExecuteProcess(cmd=[ExecutableInPackage('spawner', 'controller_manager'),' joint_state_broadcaster'],

@@ -23,9 +23,10 @@ from launch.actions import (
     DeclareLaunchArgument,
     ExecuteProcess,
     IncludeLaunchDescription,
+    SetLaunchConfiguration,
     Shutdown
 )
-from launch.conditions import UnlessCondition
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import (
     Command,
@@ -96,9 +97,16 @@ def generate_launch_description():
               output='both',
               parameters=[{'robot_description': robot_description}]
             )
+          ,SetLaunchConfiguration('fer_controllers',
+                                  value=PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'), 'config', 'fer_ros_controllers.yaml']),
+                                  condition=IfCondition(LaunchConfiguration('use_fake_hardware')))
+          ,SetLaunchConfiguration('fer_controllers',
+                                  value=PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'), 'config', 'fer_mock_controllers.yaml']),
+                                  condition=UnlessCondition(LaunchConfiguration('use_fake_hardware'))
+                                  )
           ,Node(package='controller_manager',
                 executable='ros2_control_node',
-                parameters=[PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'), 'config', 'fer_ros_controllers.yaml'])],
+                parameters=[LaunchConfiguration('fer_controllers')],
                 remappings=[('joint_states', 'franka/joint_states')],
                 output='screen',
                 on_exit=Shutdown(),

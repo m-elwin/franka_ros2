@@ -100,10 +100,10 @@ def generate_launch_description():
               parameters=[{'robot_description': robot_description}]
             )
           ,SetLaunchConfiguration('fer_controllers',
-                                  value=PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'), 'config', 'fer_ros_controllers.yaml']),
+                                  value=PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'), 'config', 'fer_mock_controllers.yaml']),
                                   condition=IfCondition(LaunchConfiguration('use_fake_hardware')))
           ,SetLaunchConfiguration('fer_controllers',
-                                  value=PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'), 'config', 'fer_mock_controllers.yaml']),
+                                  value=PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'), 'config', 'fer_ros_controllers.yaml']),
                                   condition=UnlessCondition(LaunchConfiguration('use_fake_hardware'))
                                   )
           ,Node(package='controller_manager',

@@ -108,7 +108,11 @@ def generate_launch_description():
                                   )
           ,Node(package='controller_manager',
                 executable='ros2_control_node',
-                parameters=[LaunchConfiguration('fer_controllers')],
+                parameters=[
+                    {'arm_id': 'fer',
+                     'robot_description': robot_description
+                    },
+                    LaunchConfiguration('fer_controllers')],
                 remappings=[('joint_states', 'franka/joint_states')],
                 output='screen',
                 on_exit=Shutdown(),

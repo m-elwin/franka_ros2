@@ -79,6 +79,7 @@ def generate_launch_description():
     robot_description_semantic = ParameterValue(Command([ExecutableInPackage("xacro", "xacro"), ' ',
                                                         PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'),'srdf','fer_arm.srdf.xacro'])])
                                                , value_type=str)
+    kinematics_yaml = load_yaml('franka_fer_moveit_config', 'config/kinematics.yaml')
 
     return LaunchDescription(
         [ DeclareLaunchArgument('robot_ip', description='Hostname or IP address of the robot.')
@@ -90,6 +91,7 @@ def generate_launch_description():
                 executable='rviz2',
                 output='log',
                 arguments=['-d', PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'),'rviz','moveit.rviz'])],
+                parameters=[kinematics_yaml]
               )
          ,Node(package='robot_state_publisher',
               executable='robot_state_publisher',
@@ -124,12 +126,13 @@ def generate_launch_description():
                      'publish_planning_scene': True,
                      'publish_state_updates': True,
                      'publish_transforms_updates': True,
+                     'publish_geometry_updates': True,
                      'monitor_dynamics': False,
                      'robot_description': robot_description,
                      'robot_description_semantic': robot_description_semantic,
-                     'robot_description_kinematics': load_yaml('franka_fer_moveit_config', 'config/kinematics.yaml'),
                      'robot_description_planning': load_yaml('franka_fer_moveit_config', 'config/joint_limits.yaml')
                      },
+                    kinematics_yaml,
                     # Setup the planning pipeline
                     ompl_planning_pipeline_config,
                     {'default_planning_pipeline': 'ompl',

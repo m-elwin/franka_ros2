@@ -143,7 +143,7 @@ def generate_launch_description():
                      'planning_pipelines': ['ompl']
                     },
                     # Allow moveit to manage trajectory execution
-                    {'moveit_simple_controller_manager': load_yaml('franka_fer_moveit_config', 'config/moveit_controllers.yaml'),
+                    {'moveit_simple_controller_manager': load_yaml('franka_fer_moveit_config', 'config/fer_controllers.yaml'),
                      'moveit_controller_manager': 'moveit_simple_controller_manager/MoveItSimpleControllerManager',
                      'moveit_manage_controllers': True,
                      'trajectory_execution.allowed_execution_duration_scaling': 1.2,
@@ -165,8 +165,6 @@ def generate_launch_description():
           ,ExecuteProcess(cmd=[ExecutableInPackage('spawner', 'controller_manager'),' fer_arm_controller'],
                           shell=True, output='screen')
           ,ExecuteProcess(cmd=[ExecutableInPackage('spawner', 'controller_manager'),' joint_state_broadcaster'],
-                          shell=True, output='screen')
-          ,ExecuteProcess(cmd=[ExecutableInPackage('spawner', 'controller_manager'), 'fer_gripper_controller'],
                           shell=True, output='screen')
          ]
     )

@@ -1,6 +1,7 @@
+# Tell moveit what controllers to use: https://moveit.picknik.ai/main/doc/examples/controller_configuration/controller_configuration_tutorial.html
 controller_names:
   - fer_arm_controller
-  - fer_gripper
+  - fer_gripper_controller
 
 fer_arm_controller:
   action_ns: follow_joint_trajectory
@@ -15,8 +16,8 @@ fer_arm_controller:
     - fer_joint6
     - fer_joint7
 
-fer_gripper:
-    action_ns: gripper_action
+fer_gripper_controller:
+    action_ns: gripper_cmd
     type: GripperCommand
     default: true
     joints:

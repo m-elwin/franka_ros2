@@ -91,7 +91,9 @@ def generate_launch_description():
                 executable='rviz2',
                 output='log',
                 arguments=['-d', PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'),'rviz','moveit.rviz'])],
-                parameters=[kinematics_yaml]
+                parameters=[kinematics_yaml,
+                            {'robot_description_planning': load_yaml('franka_fer_moveit_config', 'config/joint_limits.yaml')}
+                            ]
               )
          ,Node(package='robot_state_publisher',
               executable='robot_state_publisher',

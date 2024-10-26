@@ -1,0 +1,6 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: franka_description
+    relative_path: robots/fer/fer.urdf.xacro
+  srdf:
+    relative_path: srdf/fer_arm.srdf.xacro

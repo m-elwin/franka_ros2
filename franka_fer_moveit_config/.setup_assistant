@@ -2,5 +2,6 @@ moveit_setup_assistant_config:
   urdf:
     package: franka_description
     relative_path: robots/fer/fer.urdf.xacro
+    xacro_args: hand:=True use_fake_hardware:=True fake_sensor_commands:=True ros2_control:=True
   srdf:
     relative_path: srdf/fer_arm.srdf.xacro

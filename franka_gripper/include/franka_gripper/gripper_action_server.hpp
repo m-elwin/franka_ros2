@@ -32,6 +32,7 @@
 #include <rclcpp_action/rclcpp_action.hpp>
 #include <sensor_msgs/msg/joint_state.hpp>
 #include <std_srvs/srv/trigger.hpp>
+#include <franka_gripper/mock_gripper.hpp>
 
 namespace franka_gripper {
 
@@ -46,6 +47,8 @@ bool resultIsReady(std::future<T>& t, std::chrono::nanoseconds future_wait_timeo
 }
 
 /// ROS node that offers multiple actions to use the gripper.
+/// @tparam G gripper: can be franka::Gripper or fake::gripper. This is explicitly instantiated
+template<class G>
 class GripperActionServer : public rclcpp::Node {
  public:
   using Homing = franka_msgs::action::Homing;
@@ -91,7 +94,7 @@ class GripperActionServer : public rclcpp::Node {
   const int k_default_state_publish_rate = 30;     // default gripper state publish rate
   const int k_default_feedback_publish_rate = 10;  // default action feedback publish rate
 
-  std::unique_ptr<franka::Gripper> gripper_;
+  std::unique_ptr<G> gripper_;
   rclcpp_action::Server<Homing>::SharedPtr homing_server_;
   rclcpp_action::Server<Move>::SharedPtr move_server_;
   rclcpp_action::Server<Grasp>::SharedPtr grasp_server_;
@@ -218,4 +221,9 @@ class GripperActionServer : public rclcpp::Node {
   void publishGripperCommandFeedback(
       const std::shared_ptr<rclcpp_action::ServerGoalHandle<GripperCommand>>& goal_handle);
 };
+template class GripperActionServer<franka::Gripper>;
+template class GripperActionServer<franka_gripper::MockGripper>;
+
+using RealGripperActionServer = GripperActionServer<franka::Gripper>;
+using MockGripperActionServer = GripperActionServer<franka_gripper::MockGripper>;
 }  // namespace franka_gripper

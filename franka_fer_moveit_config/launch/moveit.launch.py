@@ -67,7 +67,6 @@ def generate_launch_description():
     }
     ompl_planning_pipeline_config['ompl'].update(load_yaml(
         'franka_fer_moveit_config', 'config/ompl_planning.yaml'))
-
     robot_description = ParameterValue(Command([ExecutableInPackage("xacro", "xacro"), " ",
                                                 PathJoinSubstitution([FindPackageShare("franka_description"), "robots", "fer", "fer.urdf.xacro"]),
                                                 ' hand:=true',

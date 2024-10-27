@@ -4,7 +4,7 @@ project(franka_fer_moveit_config)
 find_package(ament_cmake REQUIRED)
 
 install(
-  DIRECTORY config launch srdf rviz
+  DIRECTORY config launch srdf
   DESTINATION share/${PROJECT_NAME}
 )
 

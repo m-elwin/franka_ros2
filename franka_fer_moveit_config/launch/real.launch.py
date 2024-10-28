@@ -24,7 +24,7 @@ def generate_launch_description():
     + [DeclareLaunchArgument("robot_ip", description="URL or ip address for the robot."),
        DeclareLaunchArgument("use_rviz", default_value="False", description="To use rviz, set to true."),
        IncludeLaunchDescription(PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'), 'launch', 'moveit_rviz.launch.py']),
-                                condition=IfCondition(LaunchConfiguration('use_rviz')))
+                                condition=IfCondition(LaunchConfiguration('use_rviz'))),
       # We need to start the gripper separately because it is not implemented as a ROS 2 controller, but rather is a separate node
         IncludeLaunchDescription(PathJoinSubstitution([FindPackageShare('franka_gripper'), 'launch', 'gripper.launch.py']),
                                  launch_arguments={

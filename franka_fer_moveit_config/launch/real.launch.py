@@ -35,6 +35,6 @@ def generate_launch_description():
          remappings=[("/controller_manager/robot_description", "/robot_description")],),
     Node(package='joint_state_publisher',
          executable='joint_state_publisher',
-         parameters=[{'source_list': ['joint_state_broadcaster/joint_states', 'fer_gripper/joint_states'], 'rate': 1000}]))
+         parameters=[{'source_list': ['joint_state_broadcaster/joint_states', 'fer_gripper/joint_states'], 'rate': 1000}])
     ])
 

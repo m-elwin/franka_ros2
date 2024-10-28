@@ -1,4 +1,4 @@
-"""Launchfile for the real robot. Does not start Rviz by default"""
+"""Launchfile for the real robot. Does not start Rviz by default."""
 
 from moveit_configs_utils import MoveItConfigsBuilder
 from moveit_configs_utils.launches import generate_rsp_launch, generate_move_group_launch, generate_moveit_rviz_launch, generate_spawn_controllers_launch
@@ -20,9 +20,11 @@ def generate_launch_description():
     )
     return LaunchDescription(generate_rsp_launch(moveit_config).entities
     + generate_move_group_launch(moveit_config).entities
-    + generate_moveit_rviz_launch(moveit_config).entities
     + generate_spawn_controllers_launch(moveit_config).entities
     + [DeclareLaunchArgument("robot_ip", description="URL or ip address for the robot."),
+       DeclareLaunchArgument("use_rviz", default_value="False", description="To use rviz, set to true."),
+       IncludeLaunchDescription(PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'), 'launch', 'moveit_rviz.launch.py']),
+                                condition=IfCondition(LaunchConfiguration('use_rviz')))
       # We need to start the gripper separately because it is not implemented as a ROS 2 controller, but rather is a separate node
         IncludeLaunchDescription(PathJoinSubstitution([FindPackageShare('franka_gripper'), 'launch', 'gripper.launch.py']),
                                  launch_arguments={

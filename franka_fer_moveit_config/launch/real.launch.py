@@ -15,15 +15,22 @@ def generate_launch_description():
     # Need to also pass in robot_ip, possibly to the move_group node
     # Goal is to run demo mode on real robot,
     # But also provide a simple setup where we can load a moveit_py node instead of the default move_Group node.
-    moveit_config = MoveItConfigsBuilder("fer", package_name="franka_fer_moveit_config").to_moveit_configs()
+    moveit_config = (
+        MoveItConfigsBuilder("fer", package_name="franka_fer_moveit_config").
+        robot_description(mapppings={"hand" : "true",
+                                     "use_fake_hardware" : "false",
+                                     "fake_sensor_commands" : "false",
+                                     "ros2_control" : "true",
+                                     "robot_ip" : LaunchConfiguration("robot_ip")}).to_moveit_configs()
+        )
     description = generate_demo_launch(moveit_config)
-
+    description.add_action(DeclareLaunchArgument("robot_ip", description="URL or ip address for the robot."))
     # We need to start the gripper separately because it is not implemented as a ROS 2 controller, but rather is a separate node
     description.add_action(IncludeLaunchDescription(PathJoinSubstitution([FindPackageShare('franka_gripper'), 'launch', 'gripper.launch.py']),
                                     launch_arguments={
                                         'arm_id' : 'fer',
-                                        'robot_ip': 'None',
-                                        'use_fake_hardware' : 'true'}.items()))
+                                        'robot_ip': LaunchConfiguration("robot_ip"),
+                                        'use_fake_hardware' : 'false'}.items()))
     # We need a joint_state_publisher to unify the joint states from the gripper and the arm
     description.add_action(
         Node(package='joint_state_publisher',

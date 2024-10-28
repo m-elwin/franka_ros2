@@ -38,3 +38,7 @@ fer_arm_controller:
       fer_joint5: { p: 250., d: 10., i: 0., i_clamp: 1. }
       fer_joint6: { p: 150., d: 10., i: 0., i_clamp: 1. }
       fer_joint7: { p: 50., d: 5., i: 0., i_clamp: 1. }
+
+joint_state_broadcaster:
+    ros__parameters:
+        use_local_topics: true

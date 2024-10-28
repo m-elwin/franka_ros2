@@ -33,5 +33,8 @@ def generate_launch_description():
          executable="ros2_control_node",
          parameters=[PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'),'config','fer_real_controllers.yaml'])],
          remappings=[("/controller_manager/robot_description", "/robot_description")],),
+    Node(package='joint_state_publisher',
+         executable='joint_state_publisher',
+         parameters=[{'source_list': ['joint_state_broadcaster/joint_states', 'fer_gripper/joint_states'], 'rate': 1000}]))
     ])
 

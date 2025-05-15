@@ -63,7 +63,7 @@ controller_interface::return_type MoveToStartExampleController::update(
     }
   } else {
     for (auto& command_interface : command_interfaces_) {
-      command_interface.set_value(0);
+      command_interface.set_value(0.0);
     }
     this->get_node()->set_parameter({"process_finished", true});
   }

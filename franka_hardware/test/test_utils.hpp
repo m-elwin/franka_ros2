@@ -84,12 +84,12 @@ class MockRobot : public franka_hardware::Robot {
   MOCK_METHOD(void, automaticErrorRecovery, (), (override));
 };
 
-inline auto createHardwareInfo() -> hardware_interface::HardwareInfo {
-  hardware_interface::HardwareInfo info;
+inline auto createHardwareInfo() -> hardware_interface::HardwareComponentInterfaceParams {
+  hardware_interface::HardwareComponentInterfaceParams params;
   std::unordered_map<std::string, std::string> hw_params;
   hw_params["robot_ip"] = "dummy_ip";
 
-  info.hardware_parameters = hw_params;
+  params.hardware_info.hardware_parameters = hw_params;
   hardware_interface::InterfaceInfo command_effort_interface, command_velocity_interface,
       command_position_interface, effort_state_interface, position_state_interface,
       velocity_state_interface;
@@ -116,8 +116,8 @@ inline auto createHardwareInfo() -> hardware_interface::HardwareInfo {
 
     joint.state_interfaces = state_interfaces;
 
-    info.joints.push_back(joint);
+    params.hardware_info.joints.push_back(joint);
   }
 
-  return info;
+  return params;
 }

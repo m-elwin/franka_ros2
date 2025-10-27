@@ -57,29 +57,29 @@ class MoveToStartExampleControllerTest : public ::testing::Test {
   std::vector<double> K_gains_ = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
   std::vector<double> D_gains_ = {1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
-  CommandInterface joint_1_pos_cmd_{joint_names_[0], HW_IF_EFFORT, &joint_commands_[0]};
-  CommandInterface joint_2_pos_cmd_{joint_names_[1], HW_IF_EFFORT, &joint_commands_[1]};
-  CommandInterface joint_3_pos_cmd_{joint_names_[2], HW_IF_EFFORT, &joint_commands_[2]};
-  CommandInterface joint_4_pos_cmd_{joint_names_[3], HW_IF_EFFORT, &joint_commands_[3]};
-  CommandInterface joint_5_pos_cmd_{joint_names_[4], HW_IF_EFFORT, &joint_commands_[4]};
-  CommandInterface joint_6_pos_cmd_{joint_names_[5], HW_IF_EFFORT, &joint_commands_[5]};
-  CommandInterface joint_7_pos_cmd_{joint_names_[6], HW_IF_EFFORT, &joint_commands_[6]};
+    std::shared_ptr<CommandInterface> joint_1_pos_cmd_ = std::make_shared<CommandInterface>(joint_names_[0], HW_IF_EFFORT, &joint_commands_[0]);
+    std::shared_ptr<CommandInterface> joint_2_pos_cmd_ = std::make_shared<CommandInterface>(joint_names_[1], HW_IF_EFFORT, &joint_commands_[1]);
+    std::shared_ptr<CommandInterface> joint_3_pos_cmd_ = std::make_shared<CommandInterface>(joint_names_[2], HW_IF_EFFORT, &joint_commands_[2]);
+    std::shared_ptr<CommandInterface> joint_4_pos_cmd_ = std::make_shared<CommandInterface>(joint_names_[3], HW_IF_EFFORT, &joint_commands_[3]);
+    std::shared_ptr<CommandInterface> joint_5_pos_cmd_ = std::make_shared<CommandInterface>(joint_names_[4], HW_IF_EFFORT, &joint_commands_[4]);
+    std::shared_ptr<CommandInterface> joint_6_pos_cmd_ = std::make_shared<CommandInterface>(joint_names_[5], HW_IF_EFFORT, &joint_commands_[5]);
+    std::shared_ptr<CommandInterface> joint_7_pos_cmd_ = std::make_shared<CommandInterface>(joint_names_[6], HW_IF_EFFORT, &joint_commands_[6]);
 
   // Position state interfaces
-  StateInterface joint_1_pos_state_{joint_names_[0], HW_IF_POSITION, &joint_q_state_[0]};
-  StateInterface joint_2_pos_state_{joint_names_[1], HW_IF_POSITION, &joint_q_state_[1]};
-  StateInterface joint_3_pos_state_{joint_names_[2], HW_IF_POSITION, &joint_q_state_[2]};
-  StateInterface joint_4_pos_state_{joint_names_[3], HW_IF_POSITION, &joint_q_state_[3]};
-  StateInterface joint_5_pos_state_{joint_names_[4], HW_IF_POSITION, &joint_q_state_[4]};
-  StateInterface joint_6_pos_state_{joint_names_[5], HW_IF_POSITION, &joint_q_state_[5]};
-  StateInterface joint_7_pos_state_{joint_names_[6], HW_IF_POSITION, &joint_q_state_[6]};
+    std::shared_ptr<StateInterface> joint_1_pos_state_ = std::make_shared<StateInterface>(joint_names_[0], HW_IF_POSITION, &joint_q_state_[0]);
+    std::shared_ptr<StateInterface> joint_2_pos_state_ = std::make_shared<StateInterface>(joint_names_[1], HW_IF_POSITION, &joint_q_state_[1]);
+    std::shared_ptr<StateInterface> joint_3_pos_state_ = std::make_shared<StateInterface>(joint_names_[2], HW_IF_POSITION, &joint_q_state_[2]);
+    std::shared_ptr<StateInterface> joint_4_pos_state_ = std::make_shared<StateInterface>(joint_names_[3], HW_IF_POSITION, &joint_q_state_[3]);
+    std::shared_ptr<StateInterface> joint_5_pos_state_ = std::make_shared<StateInterface>(joint_names_[4], HW_IF_POSITION, &joint_q_state_[4]);
+    std::shared_ptr<StateInterface> joint_6_pos_state_ = std::make_shared<StateInterface>(joint_names_[5], HW_IF_POSITION, &joint_q_state_[5]);
+    std::shared_ptr<StateInterface> joint_7_pos_state_ = std::make_shared<StateInterface>(joint_names_[6], HW_IF_POSITION, &joint_q_state_[6]);
 
   // Velocity state interfaces
-  StateInterface joint_1_vel_state_{joint_names_[0], HW_IF_VELOCITY, &joint_dq_state_[0]};
-  StateInterface joint_2_vel_state_{joint_names_[1], HW_IF_VELOCITY, &joint_dq_state_[1]};
-  StateInterface joint_3_vel_state_{joint_names_[2], HW_IF_VELOCITY, &joint_dq_state_[2]};
-  StateInterface joint_4_vel_state_{joint_names_[3], HW_IF_VELOCITY, &joint_dq_state_[3]};
-  StateInterface joint_5_vel_state_{joint_names_[4], HW_IF_VELOCITY, &joint_dq_state_[4]};
-  StateInterface joint_6_vel_state_{joint_names_[5], HW_IF_VELOCITY, &joint_dq_state_[5]};
-  StateInterface joint_7_vel_state_{joint_names_[6], HW_IF_VELOCITY, &joint_dq_state_[6]};
+    std::shared_ptr<StateInterface> joint_1_vel_state_ = std::make_shared<StateInterface>(joint_names_[0], HW_IF_VELOCITY, &joint_dq_state_[0]);
+    std::shared_ptr<StateInterface> joint_2_vel_state_ = std::make_shared<StateInterface>(joint_names_[1], HW_IF_VELOCITY, &joint_dq_state_[1]);
+    std::shared_ptr<StateInterface> joint_3_vel_state_ = std::make_shared<StateInterface>(joint_names_[2], HW_IF_VELOCITY, &joint_dq_state_[2]);
+    std::shared_ptr<StateInterface> joint_4_vel_state_ = std::make_shared<StateInterface>(joint_names_[3], HW_IF_VELOCITY, &joint_dq_state_[3]);
+    std::shared_ptr<StateInterface> joint_5_vel_state_ = std::make_shared<StateInterface>(joint_names_[4], HW_IF_VELOCITY, &joint_dq_state_[4]);
+    std::shared_ptr<StateInterface> joint_6_vel_state_ = std::make_shared<StateInterface>(joint_names_[5], HW_IF_VELOCITY, &joint_dq_state_[5]);
+    std::shared_ptr<StateInterface> joint_7_vel_state_ = std::make_shared<StateInterface>(joint_names_[6], HW_IF_VELOCITY, &joint_dq_state_[6]);
 };

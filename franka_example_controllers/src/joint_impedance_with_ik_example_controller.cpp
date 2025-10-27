@@ -243,8 +243,7 @@ CallbackReturn JointImpedanceWithIKExampleController::on_configure(
   }
 
   franka_robot_model_ = std::make_unique<franka_semantic_components::FrankaRobotModel>(
-      franka_semantic_components::FrankaRobotModel(arm_id_ + "/" + k_robot_model_interface_name,
-                                                   arm_id_ + "/" + k_robot_state_interface_name));
+      arm_id_ + "/" + k_robot_model_interface_name, arm_id_ + "/" + k_robot_state_interface_name);
 
   auto collision_client = get_node()->create_client<franka_msgs::srv::SetFullCollisionBehavior>(
       "service_server/set_full_collision_behavior");

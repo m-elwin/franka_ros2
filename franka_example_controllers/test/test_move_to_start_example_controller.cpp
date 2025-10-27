@@ -44,9 +44,14 @@ void MoveToStartExampleControllerTest::TearDown() {
 }
 
 void MoveToStartExampleControllerTest::SetUpController() {
-  const auto result = controller_->init("test_move_to_start_example",ros2_control_test_assets::minimal_robot_urdf,30,"", rclcpp::NodeOptions()
+    controller_interface::ControllerInterfaceParams params;
+    params.controller_name = "test_move_to_start_example";
+    params.robot_description = ros2_control_test_assets::minimal_robot_urdf;
+    params.update_rate = 30;
+    params.node_options = rclcpp::NodeOptions()
         .allow_undeclared_parameters(true)
-        .automatically_declare_parameters_from_overrides(true));
+        .automatically_declare_parameters_from_overrides(true);
+  const auto result = controller_->init(params);
   ASSERT_EQ(result, controller_interface::return_type::OK);
   std::vector<LoanedCommandInterface> command_ifs;
   std::vector<LoanedStateInterface> state_ifs;
@@ -131,11 +136,11 @@ TEST_F(MoveToStartExampleControllerTest, correct_setup_on_update_expect_ok) {
 
   ASSERT_EQ(controller_->update(time, duration), controller_interface::return_type::OK);
 
-  EXPECT_NEAR(joint_1_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
-  EXPECT_NEAR(joint_2_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
-  EXPECT_NEAR(joint_3_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
-  EXPECT_NEAR(joint_4_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
-  EXPECT_NEAR(joint_5_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
-  EXPECT_NEAR(joint_6_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
-  EXPECT_NEAR(joint_7_pos_cmd_.get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_1_pos_cmd_->get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_2_pos_cmd_->get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_3_pos_cmd_->get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_4_pos_cmd_->get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_5_pos_cmd_->get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_6_pos_cmd_->get_optional<double>().value_or(-1), 0.0, k_EPS);
+  EXPECT_NEAR(joint_7_pos_cmd_->get_optional<double>().value_or(-1), 0.0, k_EPS);
 }

@@ -70,8 +70,7 @@ controller_interface::CallbackReturn FrankaRobotStateBroadcaster::on_configure(
   }
   if (!franka_robot_state_) {
     franka_robot_state_ = std::make_unique<franka_semantic_components::FrankaRobotState>(
-        franka_semantic_components::FrankaRobotState(params.arm_id + "/" + state_interface_name,
-                                                     robot_description));
+        params.arm_id + "/" + state_interface_name, robot_description);
   }
   current_pose_stamped_publisher_ = get_node()->create_publisher<geometry_msgs::msg::PoseStamped>(
       kCurrentPoseTopic, rclcpp::SystemDefaultsQoS());

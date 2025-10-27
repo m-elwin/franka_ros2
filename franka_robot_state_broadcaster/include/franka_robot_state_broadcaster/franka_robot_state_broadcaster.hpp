@@ -30,7 +30,7 @@
 // Without NON_POLLING mode there is a race condition where this controller
 // attempts to aquire the lock, fails, and then terminates
 #define NON_POLLING
-#include "realtime_tools/realtime_publisher.h"
+#include "realtime_tools/realtime_publisher.hpp"
 #undef NON_POLLING
 
 namespace franka_robot_state_broadcaster {

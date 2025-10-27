@@ -15,6 +15,7 @@
 #include "franka_semantic_components/franka_robot_state.hpp"
 
 #include <cstring>
+#include <optional>
 #include <stack>
 
 #include "rclcpp/logging.hpp"
@@ -25,9 +26,9 @@
 
 namespace {
 
-const size_t kBaseLinkIndex = 0;
-const size_t kFlangeLinkIndex = 8;
-const size_t kLoadLinkIndex = 8;
+constexpr size_t kBaseLinkIndex = 0;
+constexpr size_t kFlangeLinkIndex = 8;
+constexpr size_t kLoadLinkIndex = 8;
 const std::string kTCPFrameName = "_hand_tcp";
 
 // Example implementation of bit_cast: https://en.cppreference.com/w/cpp/numeric/bit_cast
@@ -57,7 +58,8 @@ FrankaRobotState::FrankaRobotState(const std::string& name, const std::string& r
   }
 
   robot_name_ = get_robot_name_from_urdf();
-  interface_names_.emplace_back(robot_name_ + "/" + state_interface_name_);
+  full_robot_state_interface_name_ = robot_name_ + "/" + state_interface_name_;
+  interface_names_.emplace_back(full_robot_state_interface_name_);
 
   gripper_loaded_ = is_gripper_loaded();
 
@@ -167,6 +169,23 @@ auto FrankaRobotState::initialize_robot_state_msg(franka_msgs::msg::FrankaRobotS
   message.inertia_ee.header.frame_id = link_names[kEndEffectorLinkIndex];
   message.inertia_load.header.frame_id = link_names[kLoadLinkIndex];
   message.inertia_total.header.frame_id = link_names[kEndEffectorLinkIndex];
+
+  // Resize dynamic vectors
+  message.measured_joint_state.position.resize(joint_names.size(), 0.0);
+  message.measured_joint_state.velocity.resize(joint_names.size(), 0.0);
+  message.measured_joint_state.effort.resize(joint_names.size(), 0.0);
+
+  message.desired_joint_state.position.resize(joint_names.size(), 0.0);
+  message.desired_joint_state.velocity.resize(joint_names.size(), 0.0);
+  message.desired_joint_state.effort.resize(joint_names.size(), 0.0);
+
+  message.measured_joint_motor_state.position.resize(joint_names.size(), 0.0);
+  message.measured_joint_motor_state.velocity.resize(joint_names.size(), 0.0);
+  message.measured_joint_motor_state.effort.resize(joint_names.size(), 0.0);
+
+  message.tau_ext_hat_filtered.position.resize(joint_names.size(), 0.0);
+  message.tau_ext_hat_filtered.velocity.resize(joint_names.size(), 0.0);
+  message.tau_ext_hat_filtered.effort.resize(joint_names.size(), 0.0);
 }
 
 auto FrankaRobotState::get_values_as_message(franka_msgs::msg::FrankaRobotState& message) -> bool {
@@ -196,21 +215,28 @@ auto FrankaRobotState::get_values_as_message(franka_msgs::msg::FrankaRobotState&
       robot_state_ptr->joint_collision, robot_state_ptr->joint_contact);
 
   // The joint states
-  message.measured_joint_state.position = translation::toJointStateVector(robot_state_ptr->q);
-  message.measured_joint_state.velocity = translation::toJointStateVector(robot_state_ptr->dq);
-  message.measured_joint_state.effort = translation::toJointStateVector(robot_state_ptr->tau_J);
+  std::copy(robot_state_ptr->q.cbegin(), robot_state_ptr->q.cend(),
+            message.measured_joint_state.position.begin());
+  std::copy(robot_state_ptr->dq.cbegin(), robot_state_ptr->dq.cend(),
+            message.measured_joint_state.velocity.begin());
+  std::copy(robot_state_ptr->tau_J.cbegin(), robot_state_ptr->tau_J.cend(),
+            message.measured_joint_state.effort.begin());
 
-  message.desired_joint_state.position = translation::toJointStateVector(robot_state_ptr->q_d);
-  message.desired_joint_state.velocity = translation::toJointStateVector(robot_state_ptr->dq_d);
-  message.desired_joint_state.effort = translation::toJointStateVector(robot_state_ptr->tau_J_d);
+  std::copy(robot_state_ptr->q_d.cbegin(), robot_state_ptr->q_d.cend(),
+            message.desired_joint_state.position.begin());
+  std::copy(robot_state_ptr->dq_d.cbegin(), robot_state_ptr->dq_d.cend(),
+            message.desired_joint_state.velocity.begin());
+  std::copy(robot_state_ptr->tau_J_d.cbegin(), robot_state_ptr->tau_J_d.cend(),
+            message.desired_joint_state.effort.begin());
 
-  message.measured_joint_motor_state.position =
-      translation::toJointStateVector(robot_state_ptr->theta);
-  message.measured_joint_motor_state.velocity =
-      translation::toJointStateVector(robot_state_ptr->dtheta);
+  std::copy(robot_state_ptr->theta.cbegin(), robot_state_ptr->theta.cend(),
+            message.measured_joint_motor_state.position.begin());
+  std::copy(robot_state_ptr->dtheta.cbegin(), robot_state_ptr->dtheta.cend(),
+            message.measured_joint_motor_state.velocity.begin());
 
-  message.tau_ext_hat_filtered.effort =
-      translation::toJointStateVector(robot_state_ptr->tau_ext_hat_filtered);
+  std::copy(robot_state_ptr->tau_ext_hat_filtered.cbegin(),
+            robot_state_ptr->tau_ext_hat_filtered.cend(),
+            message.tau_ext_hat_filtered.effort.begin());
 
   message.ddq_d = robot_state_ptr->ddq_d;
   message.dtau_j = robot_state_ptr->dtau_J;

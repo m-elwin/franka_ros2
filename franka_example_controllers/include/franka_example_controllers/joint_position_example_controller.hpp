@@ -46,10 +46,10 @@ class JointPositionExampleController : public controller_interface::ControllerIn
   std::string robot_description_;
   const int num_joints = 7;
   std::array<double, 7> initial_q_{0, 0, 0, 0, 0, 0, 0};
-  const double trajectory_period{0.001};
   double elapsed_time_ = 0.0;
-  const std::string k_HW_IF_INITIAL_POSITION = "initial_joint_position";
-
+  double initial_robot_time_ = 0.0;
+  double robot_time_ = 0.0;
+  double trajectory_period_ = 0.001;
   bool initialization_flag_{true};
   rclcpp::Time start_time_;
 };

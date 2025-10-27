@@ -61,8 +61,12 @@ controller_interface::return_type JointImpedanceExampleController::update(
   dq_filtered_ = (1 - kAlpha) * dq_filtered_ + kAlpha * dq_;
   Vector7d tau_d_calculated =
       k_gains_.cwiseProduct(q_goal - q_) + d_gains_.cwiseProduct(-dq_filtered_);
+
   for (int i = 0; i < num_joints; ++i) {
-    command_interfaces_[i].set_value(tau_d_calculated(i));
+    if (!command_interfaces_[i].set_value(tau_d_calculated(i))) {
+      RCLCPP_FATAL(get_node()->get_logger(), "Failed to set command interface value");
+      return controller_interface::return_type::ERROR;
+    }
   }
   return controller_interface::return_type::OK;
 }
@@ -109,7 +113,7 @@ CallbackReturn JointImpedanceExampleController::on_configure(
   dq_filtered_.setZero();
 
   auto parameters_client =
-      std::make_shared<rclcpp::AsyncParametersClient>(get_node(), "/robot_state_publisher");
+      std::make_shared<rclcpp::AsyncParametersClient>(get_node(), "robot_state_publisher");
   parameters_client->wait_for_service();
 
   auto future = parameters_client->get_parameters({"robot_description"});
@@ -143,8 +147,8 @@ void JointImpedanceExampleController::updateJointStates() {
     assert(position_interface.get_interface_name() == "position");
     assert(velocity_interface.get_interface_name() == "velocity");
 
-    q_(i) = position_interface.get_value();
-    dq_(i) = velocity_interface.get_value();
+    q_(i) = position_interface.get_optional().value();
+    dq_(i) = velocity_interface.get_optional().value();
   }
 }
 

@@ -19,11 +19,10 @@
 #include <cassert>
 #include <cmath>
 #include <exception>
+#include <rclcpp/logging.hpp>
 #include <string>
 
 #include <Eigen/Eigen>
-
-using namespace std::chrono_literals;
 
 namespace franka_example_controllers {
 
@@ -62,10 +61,11 @@ controller_interface::return_type JointVelocityExampleController::update(
                  (1.0 - std::cos(2.0 * M_PI / time_max.seconds() * elapsed_time_.seconds()));
 
   for (int i = 0; i < num_joints; i++) {
-    if (i == 3 || i == 4) {
-      command_interfaces_[i].set_value(omega);
-    } else {
-      command_interfaces_[i].set_value(0.0);
+    double target = (i == 3 || i == 4) ? omega : 0.0;
+    if (!command_interfaces_[i].set_value(target)) {
+      RCLCPP_ERROR(get_node()->get_logger(), "Failed to set command interface %s value",
+                   command_interfaces_[i].get_name().c_str());
+      return controller_interface::return_type::ERROR;
     }
   }
   return controller_interface::return_type::OK;
@@ -87,13 +87,17 @@ CallbackReturn JointVelocityExampleController::on_configure(
   is_gazebo = get_node()->get_parameter("gazebo").as_bool();
 
   auto parameters_client =
-      std::make_shared<rclcpp::AsyncParametersClient>(get_node(), "/robot_state_publisher");
+      std::make_shared<rclcpp::AsyncParametersClient>(get_node(), "robot_state_publisher");
   parameters_client->wait_for_service();
 
   auto future = parameters_client->get_parameters({"robot_description"});
   auto result = future.get();
   if (!result.empty()) {
     robot_description_ = result[0].value_to_string();
+    if (robot_description_.empty()) {
+      RCLCPP_ERROR(get_node()->get_logger(), "robot_description parameter is empty.");
+      return CallbackReturn::ERROR;
+    }
   } else {
     RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot_description parameter.");
   }
@@ -106,7 +110,7 @@ CallbackReturn JointVelocityExampleController::on_configure(
     auto request = DefaultRobotBehavior::getDefaultCollisionBehaviorRequest();
 
     auto future_result = client->async_send_request(request);
-    future_result.wait_for(1000ms);
+    future_result.wait_for(robot_utils::time_out);
 
     auto success = future_result.get();
     if (!success) {

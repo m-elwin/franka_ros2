@@ -32,6 +32,7 @@ namespace franka_example_controllers {
 
 controller_interface::CallbackReturn ModelExampleController::on_init() {
   try {
+    auto_declare("arm_id", "fr3");
     if (!get_node()->get_parameter("arm_id", arm_id_)) {
       RCLCPP_FATAL(get_node()->get_logger(), "Failed to get arm_id parameter");
       get_node()->shutdown();

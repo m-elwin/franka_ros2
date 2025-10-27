@@ -18,6 +18,7 @@
 #include <cassert>
 #include <cmath>
 #include <exception>
+#include <rclcpp/logging.hpp>
 #include <string>
 
 #include <chrono>
@@ -55,6 +56,8 @@ JointImpedanceWithIKExampleController::state_interface_configuration() const {
     config.names.push_back(franka_robot_model_name);
   }
 
+  config.names.push_back(arm_id_ + "/robot_time");
+
   return config;
 }
 
@@ -64,14 +67,14 @@ void JointImpedanceWithIKExampleController::update_joint_states() {
     const auto& position_interface = state_interfaces_.at(16 + i);
     const auto& velocity_interface = state_interfaces_.at(23 + i);
     const auto& effort_interface = state_interfaces_.at(30 + i);
-    joint_positions_current_[i] = position_interface.get_value();
-    joint_velocities_current_[i] = velocity_interface.get_value();
-    joint_efforts_current_[i] = effort_interface.get_value();
+
+    joint_positions_current_[i] = position_interface.get_optional().value();
+    joint_velocities_current_[i] = velocity_interface.get_optional().value();
+    joint_efforts_current_[i] = effort_interface.get_optional().value();
   }
 }
 
 Eigen::Vector3d JointImpedanceWithIKExampleController::compute_new_position() {
-  elapsed_time_ = elapsed_time_ + trajectory_period_;
   double radius = 0.1;
 
   double angle = M_PI / 4 * (1 - std::cos(M_PI / 5.0 * elapsed_time_));
@@ -111,8 +114,9 @@ JointImpedanceWithIKExampleController::create_ik_service_request(
   service_request->ik_request.robot_state.joint_state.velocity = joint_velocities_current;
   service_request->ik_request.robot_state.joint_state.effort = joint_efforts_current;
 
-  // If Franka Hand is not connected, the following line should be commented out.
-  service_request->ik_request.ik_link_name = arm_id_ + "_hand_tcp";
+  if (is_gripper_loaded_) {
+    service_request->ik_request.ik_link_name = arm_id_ + "_hand_tcp";
+  }
   return service_request;
 }
 
@@ -134,10 +138,16 @@ Vector7d JointImpedanceWithIKExampleController::compute_torque_command(
 controller_interface::return_type JointImpedanceWithIKExampleController::update(
     const rclcpp::Time& /*time*/,
     const rclcpp::Duration& /*period*/) {
+  robot_time_ = state_interfaces_.back().get_optional<double>().value();
+
   if (initialization_flag_) {
     std::tie(orientation_, position_) =
-        franka_cartesian_pose_->getInitialOrientationAndTranslation();
+        franka_cartesian_pose_->getCurrentOrientationAndTranslation();
+    initial_robot_time_ = robot_time_;
+    elapsed_time_ = 0.0;
     initialization_flag_ = false;
+  } else {
+    elapsed_time_ = robot_time_ - initial_robot_time_;
   }
   update_joint_states();
 
@@ -171,15 +181,23 @@ controller_interface::return_type JointImpedanceWithIKExampleController::update(
 
   auto tau_d_calculated = compute_torque_command(
       joint_positions_desired_eigen, joint_positions_current_eigen, joint_velocities_current_eigen);
-
   for (int i = 0; i < num_joints_; i++) {
-    command_interfaces_[i].set_value(tau_d_calculated(i));
+    if (!command_interfaces_[i].set_value(tau_d_calculated(i))) {
+      RCLCPP_ERROR(get_node()->get_logger(), "Failed to set command interface value");
+      return controller_interface::return_type::ERROR;
+    }
   }
 
   return controller_interface::return_type::OK;
 }
 
 CallbackReturn JointImpedanceWithIKExampleController::on_init() {
+  auto_declare("arm_id", "fr3");
+  auto_declare("load_gripper", false);
+  std::vector<double> default_k_gains{600.0, 600.0, 600.0, 600.0, 250.0, 150.0, 50.0};
+  std::vector<double> default_d_gains{30.0, 30.0, 30.0, 30.0, 10.0, 10.0, 5.0};
+  auto_declare("k_gains", default_k_gains);
+  auto_declare("d_gains", default_d_gains);
   franka_cartesian_pose_ =
       std::make_unique<franka_semantic_components::FrankaCartesianPoseInterface>(
           franka_semantic_components::FrankaCartesianPoseInterface(k_elbow_activated_));
@@ -189,6 +207,8 @@ CallbackReturn JointImpedanceWithIKExampleController::on_init() {
 
 bool JointImpedanceWithIKExampleController::assign_parameters() {
   arm_id_ = get_node()->get_parameter("arm_id").as_string();
+  is_gripper_loaded_ = get_node()->get_parameter("load_gripper").as_bool();
+
   auto k_gains = get_node()->get_parameter("k_gains").as_double_array();
   auto d_gains = get_node()->get_parameter("d_gains").as_double_array();
   if (k_gains.empty()) {
@@ -227,8 +247,8 @@ CallbackReturn JointImpedanceWithIKExampleController::on_configure(
                                                    arm_id_ + "/" + k_robot_state_interface_name));
 
   auto collision_client = get_node()->create_client<franka_msgs::srv::SetFullCollisionBehavior>(
-      "/service_server/set_full_collision_behavior");
-  compute_ik_client_ = get_node()->create_client<moveit_msgs::srv::GetPositionIK>("/compute_ik");
+      "service_server/set_full_collision_behavior");
+  compute_ik_client_ = get_node()->create_client<moveit_msgs::srv::GetPositionIK>("compute_ik");
 
   while (!compute_ik_client_->wait_for_service(1s) || !collision_client->wait_for_service(1s)) {
     if (!rclcpp::ok()) {
@@ -249,6 +269,20 @@ CallbackReturn JointImpedanceWithIKExampleController::on_configure(
   } else {
     RCLCPP_INFO(get_node()->get_logger(), "Default collision behavior set.");
   }
+
+  auto parameters_client =
+      std::make_shared<rclcpp::AsyncParametersClient>(get_node(), "robot_state_publisher");
+  parameters_client->wait_for_service();
+
+  auto future = parameters_client->get_parameters({"robot_description"});
+  auto result = future.get();
+  if (!result.empty()) {
+    robot_description_ = result[0].value_to_string();
+  } else {
+    RCLCPP_ERROR(get_node()->get_logger(), "Failed to get robot_description parameter.");
+  }
+
+  arm_id_ = robot_utils::getRobotNameFromDescription(robot_description_, get_node()->get_logger());
 
   return CallbackReturn::SUCCESS;
 }

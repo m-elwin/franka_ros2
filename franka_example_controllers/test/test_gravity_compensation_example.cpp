@@ -23,6 +23,7 @@
 #include "hardware_interface/types/hardware_interface_type_values.hpp"
 #include "rclcpp/utilities.hpp"
 #include "rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp"
+#include <ros2_control_test_assets/descriptions.hpp>
 
 using hardware_interface::CommandInterface;
 using hardware_interface::HW_IF_EFFORT;
@@ -73,7 +74,9 @@ void TestGravityCompensationExample::TearDown() {
 }
 
 void TestGravityCompensationExample::SetUpController() {
-    const auto result = controller_->init("test_gravitiy_compensation_example", "", 0, "", controller_->define_custom_node_options());
+  const auto result = controller_->init("test_gravitiy_compensation_example",ros2_control_test_assets::minimal_robot_urdf,30,"", rclcpp::NodeOptions()
+        .allow_undeclared_parameters(true)
+        .automatically_declare_parameters_from_overrides(true));
   ASSERT_EQ(result, controller_interface::return_type::OK);
   std::vector<LoanedCommandInterface> command_ifs;
   command_ifs.emplace_back(joint_1_pos_cmd_);
@@ -126,11 +129,11 @@ TEST_F(TestGravityCompensationExample, given_joints_and_interface_when_update_ex
             controller_interface::return_type::OK);
 
   // check joint commands are updated to zero torque value
-  ASSERT_EQ(joint_1_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_2_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_3_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_4_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_5_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_6_pos_cmd_.get_value(), 0.0);
-  ASSERT_EQ(joint_7_pos_cmd_.get_value(), 0.0);
+  ASSERT_EQ(joint_1_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_2_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_3_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_4_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_5_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_6_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
+  ASSERT_EQ(joint_7_pos_cmd_.get_optional<double>().value_or(-1), 0.0);
 }

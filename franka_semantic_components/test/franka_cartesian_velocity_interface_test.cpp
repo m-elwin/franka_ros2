@@ -42,7 +42,7 @@ void FrankaCartesianVelocityTest::setUpHWStateInterfaces(bool elbow_activate) {
     }
 
     for (auto& elbow_state_interface : elbow_state_interfaces_container) {
-      temp_state_interfaces.emplace_back(*elbow_state_interface.get());
+      temp_state_interfaces.emplace_back(elbow_state_interface);
     }
 
     franka_cartesian_command_friend->assign_loaned_state_interfaces(temp_state_interfaces);
@@ -68,12 +68,12 @@ void FrankaCartesianVelocityTest::setUpHWCommandInterfaces(bool elbow_activate) 
                                                    &hw_elbow_command_.at(i)}));
     }
     for (auto& elbow_command_interface : elbow_command_interfaces_container) {
-      temp_command_interfaces.emplace_back(*elbow_command_interface.get());
+      temp_command_interfaces.emplace_back(elbow_command_interface);
     }
   }
 
   for (auto& velocity_command_interface : velocity_command_interfaces_container) {
-    temp_command_interfaces.emplace_back(*velocity_command_interface.get());
+    temp_command_interfaces.emplace_back(velocity_command_interface);
   }
 
   franka_cartesian_command_friend->assign_loaned_command_interfaces(temp_command_interfaces);
@@ -198,8 +198,8 @@ TEST_F(
 TEST_F(FrankaCartesianVelocityTest,
        given_incorrect_command_interfaces_set_velocity_expect_unsuccesful) {
   franka_cartesian_command_friend = std::make_unique<FrankaCartesianVelocityTestFriend>(true);
-  hardware_interface::CommandInterface dummy_command_interface{"dummy", "dummy_cartesian_velocity",
-                                                               &hw_elbow_command_.at(0)};
+  auto dummy_command_interface = std::make_shared<hardware_interface::CommandInterface>("dummy", "dummy_cartesian_velocity",
+                                                               &hw_elbow_command_.at(0));
   std::array<double, 6> new_hw_cartesian_velocities{0.0, 2.0, 4.0, 6.0, 8.0, 10.0};
   Eigen::Vector3d cartesian_linear_velocity(new_hw_cartesian_velocities[0],
                                             new_hw_cartesian_velocities[1],

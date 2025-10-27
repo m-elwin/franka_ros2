@@ -18,7 +18,7 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "urdf/model.h"
+#include "urdf/model.hpp"
 
 #include "franka/robot_state.h"
 #include "franka_msgs/msg/franka_robot_state.hpp"

@@ -39,7 +39,7 @@ void FrankaCartesianPoseTest::setUpHWStateInterfaces(bool elbow_activate) {
             &initial_cartesian_pose_.at(i)}));
   }
   for (auto& pose_state_interface : pose_state_interfaces_container) {
-    temp_state_interfaces.emplace_back(*pose_state_interface.get());
+    temp_state_interfaces.emplace_back(pose_state_interface);
   }
   if (elbow_activate) {
     for (auto i = 0U; i < hw_elbow_command_names_.size(); i++) {
@@ -49,7 +49,7 @@ void FrankaCartesianPoseTest::setUpHWStateInterfaces(bool elbow_activate) {
               &initial_elbow_state_.at(i)}));
     }
     for (auto& elbow_state_interface : elbow_state_interfaces_container) {
-      temp_state_interfaces.emplace_back(*elbow_state_interface.get());
+      temp_state_interfaces.emplace_back(elbow_state_interface);
     }
   }
 
@@ -65,7 +65,7 @@ void FrankaCartesianPoseTest::setUpHWCommandInterfaces(bool elbow_activate) {
             std::to_string(i), cartesian_pose_command_interface_name_, &hw_cartesian_pose_.at(i)}));
   }
   for (auto& pose_command_interface : pose_command_interfaces_container) {
-    temp_command_interfaces.emplace_back(*pose_command_interface.get());
+    temp_command_interfaces.emplace_back(pose_command_interface);
   }
   if (elbow_activate) {
     for (auto i = 0U; i < hw_elbow_command_names_.size(); i++) {
@@ -76,7 +76,7 @@ void FrankaCartesianPoseTest::setUpHWCommandInterfaces(bool elbow_activate) {
                                                    &hw_elbow_command_.at(i)}));
     }
     for (auto& elbow_command_interface : elbow_command_interfaces_container) {
-      temp_command_interfaces.emplace_back(*elbow_command_interface.get());
+      temp_command_interfaces.emplace_back(elbow_command_interface);
     }
   }
   franka_cartesian_command_friend->assign_loaned_command_interfaces(temp_command_interfaces);
@@ -173,8 +173,8 @@ TEST_F(
 TEST_F(FrankaCartesianPoseTest,
        given_incorrect_command_interfaces_set_velocity_expect_unsuccesful) {
   franka_cartesian_command_friend = std::make_unique<FrankaCartesianPoseTestFriend>(true);
-  hardware_interface::CommandInterface dummy_command_interface{"dummy", "dummy_cartesian_pose",
-                                                               &hw_elbow_command_.at(0)};
+  auto  dummy_command_interface = std::make_shared<hardware_interface::CommandInterface>("dummy", "dummy_cartesian_pose",
+                                                               &hw_elbow_command_.at(0));
   std::array<double, 16> new_hw_cartesian_pose{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0,
                                                0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 8.0};
 

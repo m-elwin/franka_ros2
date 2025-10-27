@@ -35,8 +35,8 @@ void FrankaRobotStateTest::SetUp() {
   robot_state.O_T_EE = end_effector_pose;
   robot_state.robot_mode = robot_mode;
 
-  hardware_interface::StateInterface franka_hw_state{
-      robot_name, franka_state_interface_name, reinterpret_cast<double*>(&robot_state_address)};
+  auto franka_hw_state = std::make_shared<hardware_interface::StateInterface>(
+      robot_name, franka_state_interface_name, reinterpret_cast<double*>(&robot_state_address));
   std::vector<hardware_interface::LoanedStateInterface> temp_state_interfaces;
 
   temp_state_interfaces.reserve(size);

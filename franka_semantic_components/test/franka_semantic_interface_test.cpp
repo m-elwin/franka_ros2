@@ -147,9 +147,9 @@ TEST_F(SemanticComponentInterfaceTest, validate_state_interfaces) {
   std::vector<double> interface_values = {1.1, 3.3, 5.5};
 
   // assign 1.1 to interface_1, 3.3 to interface_3 and 5.5 to interface_5
-  hardware_interface::StateInterface interface_1{component_name_, "1", &interface_values[0]};
-  hardware_interface::StateInterface interface_3{component_name_, "3", &interface_values[1]};
-  hardware_interface::StateInterface interface_5{component_name_, "5", &interface_values[2]};
+  auto interface_1 = std::make_shared<hardware_interface::StateInterface>(component_name_, "1", &interface_values[0]);
+  auto interface_3 = std::make_shared<hardware_interface::StateInterface>(component_name_, "3", &interface_values[1]);
+  auto interface_5 = std::make_shared<hardware_interface::StateInterface>(component_name_, "5", &interface_values[2]);
 
   // create local state interface vector
   std::vector<hardware_interface::LoanedStateInterface> temp_state_interfaces;
@@ -198,9 +198,9 @@ TEST_F(SemanticComponentInterfaceTest, validate_command_interfaces) {
   std::vector<double> interface_values = {1.1, 3.3, 5.5};
 
   // assign 1.1 to interface_1, 3.3 to interface_3 and 5.5 to interface_5
-  hardware_interface::CommandInterface interface_1{component_name_, "1", &interface_values[0]};
-  hardware_interface::CommandInterface interface_3{component_name_, "3", &interface_values[1]};
-  hardware_interface::CommandInterface interface_5{component_name_, "5", &interface_values[2]};
+  auto interface_1 = std::make_shared<hardware_interface::CommandInterface>(component_name_, "1", &interface_values[0]);
+  auto interface_3 = std::make_shared<hardware_interface::CommandInterface>(component_name_, "3", &interface_values[1]);
+  auto interface_5 = std::make_shared<hardware_interface::CommandInterface>(component_name_, "5", &interface_values[2]);
 
   // create local state interface vector
   std::vector<hardware_interface::LoanedCommandInterface> temp_command_interfaces;

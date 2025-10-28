@@ -9,6 +9,24 @@ from launch_ros.actions import Node
 from launch import LaunchDescription
 from launch.conditions import IfCondition
 
+# TODO: This is a temporary fix until moveit_configs_utils.launches.generate_spawn_controllers_launch provides a method
+# To do an --switch-asap or the controller is written in a way that does not require it
+# When replaced it will be imported with generate_spawn_controllers_launch
+def generate_spawn_controllers_launch(moveit_config):
+    controller_names = moveit_config.trajectory_execution.get(
+        "moveit_simple_controller_manager", {}
+    ).get("controller_names", [])
+    ld = LaunchDescription()
+    for controller in controller_names + ["joint_state_broadcaster"]:
+        ld.add_action(
+            Node(
+                package="controller_manager",
+                executable="spawner",
+                arguments=[controller],
+                output="screen",
+            )
+        )
+    return ld
 def generate_launch_description():
     moveit_config = (
         MoveItConfigsBuilder("fer", package_name="franka_fer_moveit_config").

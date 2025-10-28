@@ -12,7 +12,7 @@ from launch.conditions import IfCondition
 # TODO: This is a temporary fix until moveit_configs_utils.launches.generate_spawn_controllers_launch provides a method
 # To do an --switch-asap or the controller is written in a way that does not require it
 # When replaced it will be imported with generate_spawn_controllers_launch
-def generate_spawn_controllers_launch(moveit_config):
+def PATCH_generate_spawn_controllers_launch(moveit_config):
     controller_names = moveit_config.trajectory_execution.get(
         "moveit_simple_controller_manager", {}
     ).get("controller_names", [])
@@ -22,7 +22,7 @@ def generate_spawn_controllers_launch(moveit_config):
             Node(
                 package="controller_manager",
                 executable="spawner",
-                arguments=[controller],
+                arguments=[controller, '--switch-asap'],
                 output="screen",
             )
         )
@@ -38,7 +38,7 @@ def generate_launch_description():
     )
     return LaunchDescription(generate_rsp_launch(moveit_config).entities
     + generate_move_group_launch(moveit_config).entities
-    + generate_spawn_controllers_launch(moveit_config).entities
+    + PATCH_generate_spawn_controllers_launch(moveit_config).entities
     + [DeclareLaunchArgument("robot_ip", description="URL or ip address for the robot."),
        DeclareLaunchArgument("use_rviz", default_value="False", description="To use rviz, set to true."),
        IncludeLaunchDescription(PathJoinSubstitution([FindPackageShare('franka_fer_moveit_config'), 'launch', 'moveit_rviz.launch.py']),

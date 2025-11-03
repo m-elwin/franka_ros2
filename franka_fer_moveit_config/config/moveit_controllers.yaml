@@ -21,9 +21,9 @@ moveit_simple_controller_manager:
       - fer_joint7
 
   fer_gripper:
-      action_ns: gripper_action
-      type: GripperCommand
-      default: true
-      joints:
-        - fer_finger_joint1
-        - fer_finger_joint2
+    action_ns: gripper_action
+    type: GripperCommand
+    default: true
+    joints:
+      - fer_finger_joint1
+      - fer_finger_joint2

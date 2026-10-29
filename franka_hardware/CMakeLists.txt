@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(franka_hardware)
 
 if(NOT CMAKE_CXX_STANDARD)
@@ -12,15 +12,15 @@ endif()
 
 option(CHECK_TIDY "Adds clang-tidy tests" OFF)
 
-# find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
+find_package(Franka 0.13.2 REQUIRED)
+find_package(fmt REQUIRED)
 find_package(franka_msgs REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(pluginlib REQUIRED)
-find_package(Franka 0.13.2 REQUIRED)
-find_package(rclcpp_components REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(rclcpp_lifecycle REQUIRED)
 
 add_library(franka_hardware SHARED
         src/franka_action_server.cpp
@@ -30,29 +30,30 @@ add_library(franka_hardware SHARED
         src/franka_executor.cpp
 )
 
-target_include_directories(
-        franka_hardware
-        PRIVATE
-        include
-)
+target_include_directories(franka_hardware PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
 
-ament_target_dependencies(
-        franka_hardware
-        hardware_interface
-        Franka
-        pluginlib
-        rclcpp
-        rclcpp_action
-        franka_msgs
-)
+target_link_libraries(franka_hardware
+        PUBLIC
+            Franka::Franka
+            franka_msgs::franka_msgs
+            hardware_interface::hardware_interface
+            rclcpp::rclcpp
+            rclcpp_action::rclcpp_action
+            rclcpp_lifecycle::rclcpp_lifecycle
+        PRIVATE
+            fmt::fmt
+            pluginlib::pluginlib)
 
 pluginlib_export_plugin_description_file(hardware_interface franka_hardware.xml)
 
 
-install(
-        TARGETS franka_hardware
-        DESTINATION lib
-)
+install(TARGETS franka_hardware
+        EXPORT export_${PROJECT_NAME}
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin)
 install(
         DIRECTORY include/
         DESTINATION include
@@ -85,16 +86,12 @@ if(BUILD_TESTING)
     endif()
 endif()
 
-ament_export_include_directories(
-        include
-)
-
-ament_export_libraries(
-        franka_hardware
-)
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(
+        Franka
+        franka_msgs
         hardware_interface
-        pluginlib
         rclcpp
-)
+        rclcpp_action
+        rclcpp_lifecycle)
 ament_package()

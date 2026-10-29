@@ -98,7 +98,7 @@ controller_interface::CallbackReturn FrankaRobotStateBroadcaster::on_configure(
     realtime_franka_state_publisher =
         std::make_shared<realtime_tools::RealtimePublisher<franka_msgs::msg::FrankaRobotState>>(
             franka_state_publisher);
-    franka_robot_state_->initialize_robot_state_msg(realtime_franka_state_publisher->msg_);
+    franka_robot_state_->initialize_robot_state_msg(franka_robot_state_msg_);
   } catch (const std::exception& e) {
     fprintf(stderr,
             "Exception thrown during publisher creation at configure stage with message : %s \n",
@@ -124,19 +124,20 @@ controller_interface::CallbackReturn FrankaRobotStateBroadcaster::on_deactivate(
 controller_interface::return_type FrankaRobotStateBroadcaster::update(
     const rclcpp::Time& time,
     const rclcpp::Duration& /*period*/) {
-  if (realtime_franka_state_publisher && realtime_franka_state_publisher->trylock()) {
-    realtime_franka_state_publisher->msg_.header.stamp = time;
+  if (!realtime_franka_state_publisher) {
+    return controller_interface::return_type::ERROR;
+  }
 
-    if (!franka_robot_state_->get_values_as_message(realtime_franka_state_publisher->msg_)) {
-      RCLCPP_ERROR(get_node()->get_logger(),
-                   "Failed to get franka state via franka state interface.");
-      realtime_franka_state_publisher->unlock();
-      return controller_interface::return_type::ERROR;
-    }
+  franka_robot_state_msg_.header.stamp = time;
 
-    realtime_franka_state_publisher->unlockAndPublish();
+  if (!franka_robot_state_->get_values_as_message(franka_robot_state_msg_)) {
+    RCLCPP_ERROR(get_node()->get_logger(),
+                 "Failed to get franka state via franka state interface.");
+    return controller_interface::return_type::ERROR;
+  }
 
-    const auto& franka_state_msg = realtime_franka_state_publisher->msg_;
+  if (realtime_franka_state_publisher->try_publish(franka_robot_state_msg_)) {
+    const auto& franka_state_msg = franka_robot_state_msg_;
 
     current_pose_stamped_publisher_->publish(franka_state_msg.o_t_ee);
 
@@ -153,12 +154,9 @@ controller_interface::return_type FrankaRobotStateBroadcaster::update(
     external_joint_torques_publisher_->publish(franka_state_msg.tau_ext_hat_filtered);
 
     desired_joint_states_publisher_->publish(franka_state_msg.desired_joint_state);
-
-    return controller_interface::return_type::OK;
-
-  } else {
-    return controller_interface::return_type::ERROR;
   }
+
+  return controller_interface::return_type::OK;
 }
 
 }  // namespace franka_robot_state_broadcaster

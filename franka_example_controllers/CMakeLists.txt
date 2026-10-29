@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(franka_example_controllers)
 
 # Default to C++17
@@ -13,21 +13,20 @@ endif()
 
 option(CHECK_TIDY "Adds clang-tidy tests" OFF)
 
-# find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(controller_interface REQUIRED)
+find_package(Eigen3 REQUIRED)
+find_package(fmt REQUIRED)
 find_package(franka_msgs REQUIRED)
 find_package(franka_semantic_components REQUIRED)
-find_package(hardware_interface REQUIRED)
-find_package(moveit_core REQUIRED)
 find_package(moveit_msgs REQUIRED)
-find_package(pinocchio REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(rclcpp REQUIRED)
-find_package(rclcpp_lifecycle REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(std_srvs REQUIRED)
-find_package(Eigen3 REQUIRED)
+find_package(tinyxml2 REQUIRED)
 
 add_library(
         ${PROJECT_NAME}
@@ -46,26 +45,26 @@ add_library(
         src/model_example_controller.cpp
         src/motion_generator.cpp
         src/move_to_start_example_controller.cpp)
-target_include_directories(
-        ${PROJECT_NAME}
+target_include_directories(${PROJECT_NAME} PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>)
+
+target_link_libraries(${PROJECT_NAME}
         PUBLIC
-        include
-        ${EIGEN3_INCLUDE_DIRS}
-)
-ament_target_dependencies(
-        ${PROJECT_NAME}
-        controller_interface
-        franka_msgs
-        franka_semantic_components
-        hardware_interface
-        moveit_core
-        moveit_msgs
-        pinocchio
-        pluginlib
-        rclcpp
-        rclcpp_lifecycle
-        std_srvs
-)
+            controller_interface::controller_interface
+            Eigen3::Eigen
+            franka_msgs::franka_msgs
+            franka_semantic_components::franka_semantic_components
+            moveit_msgs::moveit_msgs
+            rclcpp::rclcpp
+            rclcpp_action::rclcpp_action
+            sensor_msgs::sensor_msgs
+            std_srvs::std_srvs
+            tinyxml2::tinyxml2
+        PRIVATE
+            ament_index_cpp::ament_index_cpp
+            fmt::fmt
+            pluginlib::pluginlib)
 
 pluginlib_export_plugin_description_file(
         controller_interface franka_example_controllers.xml)
@@ -73,6 +72,7 @@ pluginlib_export_plugin_description_file(
 install(
         TARGETS
         ${PROJECT_NAME}
+        EXPORT export_${PROJECT_NAME}
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
@@ -106,36 +106,28 @@ if(BUILD_TESTING)
     ament_add_gmock(${PROJECT_NAME}_test
         test/test_load_gravity_compensation_controller.cpp
     )
-    target_include_directories(${PROJECT_NAME}_test PRIVATE include)
-    ament_target_dependencies(${PROJECT_NAME}_test
-        controller_manager
-        ros2_control_test_assets
-    )
+    target_link_libraries(${PROJECT_NAME}_test
+        controller_manager::controller_manager
+        ros2_control_test_assets::ros2_control_test_assets)
 
     ament_add_gmock(${PROJECT_NAME}_test_load_move_to_start
         test/test_load_move_to_start_example_controller.cpp)
-    target_include_directories(${PROJECT_NAME}_test_load_move_to_start PRIVATE include)
-    ament_target_dependencies(${PROJECT_NAME}_test_load_move_to_start
-        controller_manager
-        ros2_control_test_assets
-    )
+    target_link_libraries(${PROJECT_NAME}_test_load_move_to_start
+        controller_manager::controller_manager
+        ros2_control_test_assets::ros2_control_test_assets)
 
 
     ament_add_gmock(${PROJECT_NAME}_gravity_test test/test_gravity_compensation_example.cpp)
-    target_include_directories(${PROJECT_NAME}_gravity_test PRIVATE include)
-    target_link_libraries(${PROJECT_NAME}_gravity_test ${PROJECT_NAME})
-    ament_target_dependencies(${PROJECT_NAME}_gravity_test
-        controller_manager
-        ros2_control_test_assets
-    )
+    target_link_libraries(${PROJECT_NAME}_gravity_test
+        ${PROJECT_NAME}
+        controller_manager::controller_manager
+        ros2_control_test_assets::ros2_control_test_assets)
 
     ament_add_gmock(${PROJECT_NAME}_move_to_start_test test/test_move_to_start_example_controller.cpp)
-    target_include_directories(${PROJECT_NAME}_move_to_start_test PRIVATE include)
-    target_link_libraries(${PROJECT_NAME}_move_to_start_test ${PROJECT_NAME})
-    ament_target_dependencies(${PROJECT_NAME}_move_to_start_test
-        controller_manager
-        ros2_control_test_assets
-    )
+    target_link_libraries(${PROJECT_NAME}_move_to_start_test
+        ${PROJECT_NAME}
+        controller_manager::controller_manager
+        ros2_control_test_assets::ros2_control_test_assets)
 
     if(CHECK_TIDY)
         find_package(ament_cmake_clang_tidy REQUIRED)
@@ -144,18 +136,16 @@ if(BUILD_TESTING)
     endif()
 endif()
 
-ament_export_include_directories(
-        include
-)
-ament_export_libraries(
-        ${PROJECT_NAME}
-)
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 ament_export_dependencies(
         controller_interface
-        pluginlib
+        Eigen3
+        franka_msgs
+        franka_semantic_components
+        moveit_msgs
         rclcpp
-        rclcpp_lifecycle
-        hardware_interface
-        moveit_core
-)
+        rclcpp_action
+        sensor_msgs
+        std_srvs
+        tinyxml2)
 ament_package()

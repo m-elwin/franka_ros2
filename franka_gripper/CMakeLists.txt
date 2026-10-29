@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(franka_gripper)
 
 if(NOT CMAKE_CXX_STANDARD)
@@ -11,32 +11,32 @@ endif()
 
 find_package(ament_cmake REQUIRED)
 find_package(ament_cmake_python REQUIRED)
+find_package(Franka 0.13.2 REQUIRED)
+find_package(control_msgs REQUIRED)
 find_package(franka_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(rclcpp_action REQUIRED)
 find_package(rclcpp_components REQUIRED)
-find_package(std_srvs REQUIRED)
 find_package(sensor_msgs REQUIRED)
-find_package(control_msgs REQUIRED)
-
-find_package(Franka 0.13.2 REQUIRED)
+find_package(std_srvs REQUIRED)
 
 add_library(gripper_server SHARED
         src/gripper_action_server.cpp)
-target_link_libraries(gripper_server Franka::Franka)
-target_include_directories(gripper_server PRIVATE
+target_include_directories(gripper_server PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>)
+target_link_libraries(gripper_server
+        PUBLIC
+            Franka::Franka
+            control_msgs::control_msgs
+            franka_msgs::franka_msgs
+            rclcpp::rclcpp
+            rclcpp_action::rclcpp_action
+            sensor_msgs::sensor_msgs
+            std_srvs::std_srvs
+        PRIVATE
+            rclcpp_components::component)
 
-ament_target_dependencies(gripper_server
-        franka_msgs
-        rclcpp
-        rclcpp_action
-        rclcpp_components
-        Franka
-        sensor_msgs
-        std_srvs
-        control_msgs)
 rclcpp_components_register_node(gripper_server PLUGIN "franka_gripper::RealGripperActionServer" EXECUTABLE franka_gripper_node)
 rclcpp_components_register_node(gripper_server PLUGIN "franka_gripper::MockGripperActionServer" EXECUTABLE franka_mock_gripper_node)
 

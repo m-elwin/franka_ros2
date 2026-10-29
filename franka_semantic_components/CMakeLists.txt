@@ -1,7 +1,6 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.16)
 project(franka_semantic_components)
 
-# Default to C++17
 if(NOT CMAKE_CXX_STANDARD)
   set(CMAKE_CXX_STANDARD 17)
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -13,29 +12,20 @@ endif()
 
 option(CHECK_TIDY "Adds clang-tidy tests" OFF)
 
-set(THIS_PACKAGE_INCLUDE_DEPENDS
-    Franka
-    franka_hardware
-    franka_msgs
-    geometry_msgs
-    sensor_msgs
-    hardware_interface
-    rclcpp_lifecycle
-    urdf
-    controller_interface)
-
-# find dependencies
 find_package(ament_cmake REQUIRED)
-foreach(Dependency IN ITEMS ${THIS_PACKAGE_INCLUDE_DEPENDS})
-  find_package(${Dependency} REQUIRED)
-endforeach()
-
 find_package(Franka 0.13.0 REQUIRED)
 find_package(Eigen3 REQUIRED)
-find_package(controller_interface)
+find_package(franka_hardware REQUIRED)
+find_package(franka_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
+find_package(hardware_interface REQUIRED)
+find_package(controller_interface REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(urdf REQUIRED)
 
-add_library(
-  franka_semantic_components SHARED
+add_library(franka_semantic_components SHARED
   src/franka_robot_state.cpp
   src/franka_robot_model.cpp
   src/franka_cartesian_velocity_interface.cpp
@@ -43,15 +33,30 @@ add_library(
   src/franka_semantic_component_interface.cpp
   src/translation_utils.cpp)
 
-target_include_directories(
-  franka_semantic_components PRIVATE include ${EIGEN3_INCLUDE_DIRS})
+target_include_directories(franka_semantic_components PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>)
 
-target_link_libraries(franka_semantic_components Franka::Franka Eigen3::Eigen)
+target_link_libraries(franka_semantic_components
+  PUBLIC
+    Franka::Franka
+    Eigen3::Eigen
+    franka_hardware::franka_hardware
+    franka_msgs::franka_msgs
+    geometry_msgs::geometry_msgs
+    sensor_msgs::sensor_msgs
+    hardware_interface::hardware_interface
+    controller_interface::controller_interface
+    urdf::urdf
+  PRIVATE
+    std_msgs::std_msgs
+    rclcpp::rclcpp)
 
-ament_target_dependencies(franka_semantic_components Franka sensor_msgs
-                          geometry_msgs ${THIS_PACKAGE_INCLUDE_DEPENDS} controller_interface)
-
-install(TARGETS franka_semantic_components DESTINATION lib)
+install(TARGETS franka_semantic_components
+  EXPORT export_${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin)
 install(DIRECTORY include/ DESTINATION include)
 
 if(BUILD_TESTING)
@@ -62,9 +67,7 @@ if(BUILD_TESTING)
   find_package(ament_cmake_lint_cmake REQUIRED)
   find_package(ament_cmake_pep257 REQUIRED)
   find_package(ament_cmake_xmllint REQUIRED)
-  find_package(franka_msgs REQUIRED)
   find_package(ament_cmake_gmock REQUIRED)
-  find_package(controller_interface REQUIRED)
 
   set(CPP_DIRECTORIES src include)
   ament_clang_format(CONFIG_FILE ../.clang-format ${CPP_DIRECTORIES})
@@ -81,89 +84,36 @@ if(BUILD_TESTING)
   endif()
 
   ament_add_gmock(test_franka_robot_state test/franka_robot_state_test.cpp)
-  target_include_directories(test_franka_robot_state PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
-  target_link_libraries(test_franka_robot_state
-    franka_semantic_components
-  )
-  ament_target_dependencies(test_franka_robot_state
-    controller_interface
-    hardware_interface
-    franka_msgs
-    sensor_msgs
-    geometry_msgs
-    Franka
-  )
+  target_link_libraries(test_franka_robot_state franka_semantic_components)
+
   ament_add_gmock(test_franka_robot_model test/franka_robot_model_test.cpp)
-  target_include_directories(test_franka_robot_model PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  target_link_libraries(test_franka_robot_model franka_semantic_components)
 
-  target_link_libraries(test_franka_robot_model
-    franka_semantic_components
-  )
-  ament_target_dependencies(test_franka_robot_model
-    controller_interface
-    hardware_interface
-    franka_msgs
-    sensor_msgs
-    geometry_msgs
-    Franka
-  )
+  ament_add_gmock(franka_semantic_component_interface_test
+    test/franka_semantic_interface_test.cpp)
+  target_link_libraries(franka_semantic_component_interface_test franka_semantic_components)
 
-  ament_add_gmock(
-    franka_semantic_component_interface_test
-    test/franka_semantic_interface_test.cpp
-  )
-  target_include_directories(franka_semantic_component_interface_test PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR}/include)
+  ament_add_gmock(franka_cartesian_velocity_interface_test
+    test/franka_cartesian_velocity_interface_test.cpp)
+  target_link_libraries(franka_cartesian_velocity_interface_test franka_semantic_components)
 
-  target_link_libraries(franka_semantic_component_interface_test
-    franka_semantic_components
-  )
-
-  ament_target_dependencies(
-    franka_semantic_component_interface_test
-    hardware_interface
-    sensor_msgs
-    geometry_msgs
-  )
-
-  ament_add_gmock(
-    franka_cartesian_velocity_interface_test
-    test/franka_cartesian_velocity_interface_test.cpp
-  )
-
-  target_include_directories(franka_cartesian_velocity_interface_test PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-  target_link_libraries(franka_cartesian_velocity_interface_test
-    franka_semantic_components
-  )
-
-  ament_target_dependencies(
-    franka_cartesian_velocity_interface_test
-    hardware_interface
-  )
-
-  ament_add_gmock(
-    franka_cartesian_pose_interface_test
-    test/franka_cartesian_pose_interface_test.cpp
-  )
-
-  target_include_directories(franka_cartesian_pose_interface_test PRIVATE  ${CMAKE_CURRENT_SOURCE_DIR}/include ${EIGEN3_INCLUDE_DIRS})
-
-  target_link_libraries(franka_cartesian_pose_interface_test
-    franka_semantic_components
-  )
-
-  ament_target_dependencies(
-    franka_cartesian_pose_interface_test
-    hardware_interface
-    sensor_msgs
-    geometry_msgs
-  )
+  ament_add_gmock(franka_cartesian_pose_interface_test
+    test/franka_cartesian_pose_interface_test.cpp)
+  target_link_libraries(franka_cartesian_pose_interface_test franka_semantic_components)
 
   install(FILES test/robot_description_test.txt
           DESTINATION share/${PROJECT_NAME})
 endif()
 
-ament_export_include_directories(include)
-ament_export_libraries(franka_semantic_components)
-ament_export_dependencies(${THIS_PACKAGE_INCLUDE_DEPENDS})
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+ament_export_dependencies(
+  Franka
+  Eigen3
+  franka_hardware
+  franka_msgs
+  geometry_msgs
+  sensor_msgs
+  hardware_interface
+  controller_interface
+  urdf)
 ament_package()
